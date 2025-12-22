@@ -1,1251 +1,865 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IELTS Reading Practice Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        html {
-            scroll-behavior: smooth;
+      html {
+        scroll-behavior: smooth;
+      }
+      .passage-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .passage-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+      .passage-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+      .passage-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
         }
-        
-        .passage-scrollbar::-webkit-scrollbar {
-            width: 8px;
+        to {
+          opacity: 1;
         }
-        
-        .passage-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
         }
-        
-        .passage-scrollbar::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
-        
-        .passage-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        /* Custom styling for two-column layout */
-        .question-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-        
-        @media (max-width: 1024px) {
-            .question-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Fixed header height */
-        header {
-            height: 80px;
-        }
-        
-        /* Main content margin for fixed header */
-        main {
-            margin-top: 100px;
-            margin-bottom: 120px; /* Space for navigation bar */
-        }
-        
-        /* Navigation bar styling */
-        #question-nav {
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        
-        /* Modal z-index */
-        #result-modal {
-            z-index: 100;
-        }
-        
-        /* Custom scrollbar for navigation */
-        #question-nav::-webkit-scrollbar {
-            height: 6px;
-        }
-        
-        #question-nav::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-        
-        #question-nav::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
+      }
+      header {
+        height: 80px;
+      }
+      main {
+        margin-top: 100px;
+        margin-bottom: 120px;
+      }
+      #question-nav {
+        max-height: 100px;
+        overflow-y: auto;
+      }
+      #result-modal {
+        z-index: 100;
+      }
+
+      /* Test cards styling */
+      .test-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .test-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Password modal */
+      .password-modal {
+        animation: fadeIn 0.3s ease;
+      }
+      .password-modal-content {
+        animation: slideUp 0.5s ease;
+      }
     </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Fixed Header with Timer and Submit Button -->
-    <header class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-800">IELTS Reading Practice Test</h1>
-            <div class="flex items-center space-x-6">
-                <div class="flex items-center space-x-4">
-                    <div class="text-lg font-semibold">Time:</div>
-                    <div id="timer" class="text-2xl font-bold text-red-600 bg-gray-100 px-4 py-2 rounded-lg">60:00</div>
-                    <button id="pause-timer" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                        <i class="fas fa-pause"></i> Pause
-                    </button>
-                </div>
-                <button id="submit-test" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300">
-                    <i class="fas fa-paper-plane"></i> Submit Test
-                </button>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Admin Password Modal -->
+    <div
+      id="admin-password-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl max-w-md w-full password-modal-content"
+      >
+        <div class="p-8">
+          <div class="text-center mb-6">
+            <div class="text-4xl text-blue-600 mb-4">
+              <i class="fas fa-lock"></i>
             </div>
+            <h2 class="text-2xl font-bold text-gray-800">Admin Access</h2>
+            <p class="text-gray-600 mt-2">
+              Enter admin password to access admin panel
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <div>
+              <label class="block text-gray-700 font-bold mb-2">Password</label>
+              <input
+                type="password"
+                id="admin-login-password"
+                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter admin password"
+              />
+              <p class="text-gray-500 text-sm mt-2">
+                <i class="fas fa-info-circle mr-1"></i>
+                Default password: admin123
+              </p>
+            </div>
+
+            <div
+              id="password-error"
+              class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
+            >
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              Incorrect password!
+            </div>
+
+            <div class="flex space-x-3">
+              <button
+                onclick="closeAdminModal()"
+                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-lg transition duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onclick="checkAdminPassword()"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300"
+              >
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Fixed Header -->
+    <header
+      id="main-header"
+      class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 hidden"
+    >
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-800">
+          IELTS Reading Practice Test
+        </h1>
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-4">
+            <div class="text-lg font-semibold">Time:</div>
+            <div
+              id="timer"
+              class="text-2xl font-bold text-red-600 bg-gray-100 px-4 py-2 rounded-lg"
+            >
+              60:00
+            </div>
+            <button
+              id="pause-timer"
+              class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            >
+              <i class="fas fa-pause"></i> Pause
+            </button>
+          </div>
+          <button
+            id="submit-test"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+          >
+            <i class="fas fa-paper-plane"></i> Submit Test
+          </button>
+          <button
+            id="back-to-tests"
+            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto p-4 ">
-
-        <!-- Questions Section -->
-        <div id="questions-container" class="space-y-8 flex">
-            <div class="w-[50%] h-[100vh] overflow-y-auto">
-                <h3 class="text-xl font-bold mb-4">When Maps were Made for the Public</h3>
-                    <p class="mb-2">Since the art of map-making began, maps have largely been made for explorers, academics and rulers. It wasn't until the 19th century that the general public began to demand maps for themselves. More than anything else, it was the appeal of travel to ordinary people that encouraged publishing companies to begin creating and printing more maps than ever before, in order to meet the demand of their new market.</p>
-                    <p class="mb-2">In the years after the American Civil War (1861-65), the rapidly growing US railroad system had so many independent rail companies, schedules and destinations that maps were critical for planning a person's journey. One publisher, Rand McNally, made a fortune from producing railways maps for different parts of the USA, combined with a timetable and many descriptions of scenery and towns in the same booklet.</p>
-                    <p class="mb-2">When safety improvements in the 1880s helped to make the bicycle popular, cycling maps quickly followed. Trying to provide something special, publisher George Philip produced attractive-looking maps that would remain in good condition even if they were exposed to water. In 1896, one of the finest cycling maps was produced, in seven parts: George Blum's Cyclers' Guide and Road Book of California. Each cycle road was highlighted in red and labeled with not only the type of surface riders could expect to find, but also an indication of how steep it was.</p>
-                    <p class="mb-2">The advent of the car brought a need for road maps and travel information. In 1900, André Michelin published a guide about France, with maps that showed the location of different kinds of reasonably priced accommodation and also car assistance for any mechanical problems. However, it was due primarily to its recommendations regarding which was the best restaurant to go to that the guide quickly became something that a huge number of tourists and travellers bought and relied on.</p>
-                    <p class="mb-2">Nowhere was the need for road maps greater than in the United States. In 1902, the American Automobile Association was founded in Chicago, and three years later it published its first road maps for long-distance drivers. In 1917, Rand McNally began to publish Auto Trails Maps, a series of maps that each focussed in detail on a different region that people might hope to visit within North America. The same publisher also helped to establish the US's system of identifying its roads. Previously roads had names, following the European tradition, but now, thanks in part to Rand McNally, they were allocated numbers instead.</p>
-                    <p class="mb-2">Also in the early twentieth century, publisher H. M. Gousha Company developed the Touraide, a set of spiral-bound maps with places to stay and eat and points of interest, ordered in advance and assembled individually for the traveller.</p>
-                    <p class="mb-2">The oil companies did not take long to realize the profit to be made from Americans exploring the open road, so service stations soon began to distribute free maps to encourage this. Free road maps became part of the fabric of American life, and it has been estimated that more than ten billion were distributed before the 1970s. It was then that the rising costs of oil and subsequent falling consumption led to the oil companies investigating where savings could be made. The maps were one of the first things to go.</p>
-                    <p class="mb-2">Another map product was the aeronautical chart for pilots. The first examples were produced in France and England around 1911. Techniques progressed greatly during World War 1, and during the 1920s there was continual development of maps for air navigation.</p>
-                    <p class="mb-2">New maps also became available for those who only wanted to cross town by train. Some of the early maps of the London Underground were based on the city above ground; therefore, although they were accurate in terms of distance and direction, the maps were confusing because the stations in central London were so crowded together. In 1931, Harry Beck produced a map that looked rather like an electrical circuit, with straight lines and symbols. It included only one feature above ground: the river Thames. The stations were also spaced relatively equally, making the map much easier to read. Although Beck's map was initially rejected as too radical, it was approved in 1933. He continued to refine it for the next 25 years.</p>
-                    <p class="mb-2">Shortly after Beck's contribution to the mapping of subterranean London, an equally significant achievement was performed above ground. Phyllis Pearsall was a painter who, in 1935, became lost on the way to a party in London, due to the lack of a good map. This inspired her to plot all of London, and the next year she traced and catalogued its 23,000 streets. With map-maker James Duncan, Pearsall then produced an atlas and a comprehensive street index. Unable to interest any of the major publishers, the two founded their own company, the Geographer's Map Company Ltd, and produced what was then called the A-Z Atlas and Guide to London. The company still exists and now publishes more than 300 different A-Z maps and atlases.</p>
-            </div>
-            <div class="w-[50%] h-[100vh] overflow-y-auto">
-                <!-- Questions 1-6 -->
-                <section id="q1" class="bg-white p-6 rounded-xl shadow-lg">
-    
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 1-6</h3>
-                    <div class="question-container flex">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>1.</strong> Rand McNally made a lot of money by putting a map and a ________ in one publication</p>
-                                 <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="1" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="font-bold mb-2">George Blum's cycling map showed:</p>
-                                <p class="mb-2 font-medium"><strong>2.</strong> the kind of ________ the paths had</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="2" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="font-bold mb-2">André Michelin's guide provided information about:</p>
-                                <p class="mb-2 font-medium"><strong>3.</strong> finding economical ________</p>
-                                <p class="mb-2">• what to do if your car broke down</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="3" placeholder="Type your answer here...">
-                                <p class="mb-2 font-medium my-2"><strong>4.</strong> the Michelin guide became popular mainly because it helped people select a ________</p>
-                                  <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="4" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="font-bold mb-2">1917 onwards:</p>
-                                <p class="mb-2 font-medium"><strong>5.</strong> the company's Auto Trails Maps helped people explore roads through a particular ________ of the USA</p>
-                                 <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="5" placeholder="Type your answer here...">
-                                <p class="mb-2 font-medium"><strong>6.</strong> the company was also responsible for giving ________ to American roads</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="6" placeholder="Type your answer here...">
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Questions 7-13 -->
-                <section id="q7" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 7-13</h3>
-                    <div class="question-container flex justify-between">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group space-y-3">
-                                <p class="mb-2 font-medium"><strong>7.</strong> The Touraide was organised according to the particular needs of each traveller.</p>
-                                 <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q7" value="TRUE" class="mr-3 h-5 w-5" data-question="7">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q7" value="FALSE" class="mr-3 h-5 w-5" data-question="7">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q7" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="7">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>8.</strong> It was the high price of oil that stopped free maps being given out to the public.</p>
-                                <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q8" value="TRUE" class="mr-3 h-5 w-5" data-question="8">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q8" value="FALSE" class="mr-3 h-5 w-5" data-question="8">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q8" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="8">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>9.</strong> In the 1920s, maps for pilots helped improve safety records for flights.</p>
-                                  <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q9" value="TRUE" class="mr-3 h-5 w-5" data-question="9">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q9" value="FALSE" class="mr-3 h-5 w-5" data-question="9">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q9" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="9">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>10.</strong> People found the early maps of the London Underground easy to read.</p>
-                                <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q10" value="TRUE" class="mr-3 h-5 w-5" data-question="10">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q10" value="FALSE" class="mr-3 h-5 w-5" data-question="10">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q10" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="10">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>11.</strong> Harry Beck had previous experience of map-making when he produced a map of the underground.</p>
-                                  <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q11" value="TRUE" class="mr-3 h-5 w-5" data-question="11">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q11" value="FALSE" class="mr-3 h-5 w-5" data-question="11">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q11" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="11">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>12.</strong> Beck's first version of the underground map met with a positive reaction.</p>
-                                 <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q12" value="TRUE" class="mr-3 h-5 w-5" data-question="12">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q12" value="FALSE" class="mr-3 h-5 w-5" data-question="12">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q12" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="12">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>13.</strong> Phyllis Pearsall was the first woman to produce a published map.</p>
-                                 <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q13" value="TRUE" class="mr-3 h-5 w-5" data-question="13">
-                                        <span>TRUE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q13" value="FALSE" class="mr-3 h-5 w-5" data-question="13">
-                                        <span>FALSE</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q13" value="NOT GIVEN" class="mr-3 h-5 w-5" data-question="13">
-                                        <span>NOT GIVEN</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                     
-                    </div>
-                </section>
-
-                <!-- Questions 14-19 -->
-                <section id="q14" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 14-19</h3>
-                    <div class="question-container flex">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6 ">
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>14.</strong> a reason the early explorers left some objects behind</p>
-                                <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="14">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>15.</strong> an explanation of how to see the huts without traveling to Antarctica</p>
-                                 <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="15">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>16.</strong> reference to the fact that Robert Falcon Scott enjoyed the time he spent living in the hut</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="16">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>17.</strong> reference to how the Ross Island project has received attention from the media</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="17">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>18.</strong> the reason the trust decided to begin conservation work at Ross Island</p>
-                                 <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="18">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>19.</strong> a description of the process for preserving paper</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="19">
-                                    <option value="">Choose paragraph</option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="C">C</option>
-                                    <option value="D">D</option>
-                                    <option value="E">E</option>
-                                    <option value="F">F</option>
-                                    <option value="G">G</option>
-                                    <option value="H">H</option>
-                                    <option value="I">I</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                       
-                    </div>
-                </section>
-                <!-- Questions 20-21 -->
-                <section id="q20" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 20-21</h3>
-                    <div class="question-container">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-2">
-                            <p class="mb-4 font-medium">Choose TWO letters, A-E. Which TWO research activities were carried out by Scott's expedition team?</p>
-                            <div class="space-y-3 pl-4">
-                                <p class="font-medium">A. collecting samples of sea life</p>
-                                <p class="font-medium">B. monitoring penguin behaviour</p>
-                                <p class="font-medium">C. studying the effects of cold on the human body</p>
-                                <p class="font-medium">D. keeping a record of Antarctic weather patterns</p>
-                                <p class="font-medium">E. drawing pictures of plants and animals</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column - Answer Options -->
-                        <div class="space-y-6">
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Select TWO options for questions 20-21:</p>
-                                <div class="space-y-3">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="A" data-question="20" data-group="20-21">
-                                        <span>A. collecting samples of sea life</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="B" data-question="20" data-group="20-21">
-                                        <span>B. monitoring penguin behaviour</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="C" data-question="20" data-group="20-21">
-                                        <span>C. studying the effects of cold on the human body</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="D" data-question="20" data-group="20-21">
-                                        <span>D. keeping a record of Antarctic weather patterns</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="E" data-question="20" data-group="20-21">
-                                        <span>E. drawing pictures of plants and animals</span>
-                                    </label>
-                                </div>
-                                <p class="mt-4 text-sm text-gray-600">Note: Select exactly two options.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Questions 22-23 -->
-                <section id="q22" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 22-23</h3>
-                    <div class="question-container">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-2">
-                            <p class="mb-4 font-medium">Choose TWO letters, A-E. Which TWO statements are true about the conservation workers on Ross Island?</p>
-                            <div class="space-y-3 pl-4">
-                                <p class="font-medium">A. They lived in Scott's huts while carrying out the work.</p>
-                                <p class="font-medium">B. They were in Antarctica for months at a time.</p>
-                                <p class="font-medium">C. They had previously worked together in New Zealand.</p>
-                                <p class="font-medium">D. They restored the contents as well as the buildings themselves.</p>
-                                <p class="font-medium">E. They had no access to showers at all.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column - Answer Options -->
-                        <div class="space-y-6">
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Select TWO options for questions 22-23:</p>
-                                <div class="space-y-3">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="A" data-question="22" data-group="22-23">
-                                        <span>A. They lived in Scott's huts while carrying out the work.</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="B" data-question="22" data-group="22-23">
-                                        <span>B. They were in Antarctica for months at a time.</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="C" data-question="22" data-group="22-23">
-                                        <span>C. They had previously worked together in New Zealand.</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="D" data-question="22" data-group="22-23">
-                                        <span>D. They restored the contents as well as the buildings themselves.</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="checkbox" class="mr-3 h-5 w-5" value="E" data-question="22" data-group="22-23">
-                                        <span>E. They had no access to showers at all.</span>
-                                    </label>
-                                </div>
-                                <p class="mt-4 text-sm text-gray-600">Note: Select exactly two options.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Questions 24-26 -->
-                <section id="q24" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 24-26</h3>
-                    <div class="question-container">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-bold text-lg mb-3">Cape Adare</h4>
-                                <p class="mb-2">Cape Adare is located several hundred kilometres north of Scott's hut. The huts on Cape Adare are not as <strong>24.</strong> ________ as those on Ross Island and the workers have to be careful not to disturb the group of <strong>25.</strong> ________ living nearby. Visitors to Antarctica must have a <strong>26.</strong> ________ to see the restored huts.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column - Answer Options -->
-                        <div class="space-y-6">
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 24:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="24" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 25:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="25" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 26:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="26" placeholder="Type your answer here...">
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Questions 27-33 -->
-                <section id="q27" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 27-33</h3>
-                    <div class="question-container flex">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>27.</strong> Paragraph A</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="27">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>28.</strong> Paragraph B</p>
-                                 <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="28">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>29.</strong> Paragraph C</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="29">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>30.</strong> Paragraph D</p>
-                                  <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="30">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>31.</strong> Paragraph E</p>
-                                 <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="31">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>32.</strong> Paragraph F</p>
-                                 <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="32">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>33.</strong> Paragraph G</p>
-                                <select class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="33">
-                                    <option value="">Select heading</option>
-                                    <option value="i">i. The design of a study involving flowers</option>
-                                    <option value="ii">ii. The application of a scientific theory</option>
-                                    <option value="iii">iii. The reaction of particular study subjects</option>
-                                    <option value="iv">iv. The long-term impact of flower-giving</option>
-                                    <option value="v">v. The emotional power of flowers</option>
-                                    <option value="vi">vi. The significance of flowers in human evolution</option>
-                                    <option value="vii">vii. Why flowers are so visually appealing</option>
-                                    <option value="viii">viii. How flowers may be manipulating human behaviour</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Questions 34-37 -->
-                <section id="q34" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 34-37</h3>
-                    <div class="question-container flex">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>34.</strong> The study focused on participants' short-term reaction to receiving flowers.</p>
-                                <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q34" value="A" class="mr-3 h-5 w-5" data-question="34">
-                                        <span>A (the first study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q34" value="B" class="mr-3 h-5 w-5" data-question="34">
-                                        <span>B (the second study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q34" value="C" class="mr-3 h-5 w-5" data-question="34">
-                                        <span>C (the third study)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>35.</strong> Participants were deliberately misled as to the aim of the study.</p>
-                                  <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q35" value="A" class="mr-3 h-5 w-5" data-question="35">
-                                        <span>A (the first study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q35" value="B" class="mr-3 h-5 w-5" data-question="35">
-                                        <span>B (the second study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q35" value="C" class="mr-3 h-5 w-5" data-question="35">
-                                        <span>C (the third study)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>36.</strong> Receiving flowers had a notable effect on participants' mental capacities.</p>
-                                  <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q36" value="A" class="mr-3 h-5 w-5" data-question="36">
-                                        <span>A (the first study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q36" value="B" class="mr-3 h-5 w-5" data-question="36">
-                                        <span>B (the second study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q36" value="C" class="mr-3 h-5 w-5" data-question="36">
-                                        <span>C (the third study)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="question-group">
-                                <p class="mb-2 font-medium"><strong>37.</strong> Male and female responses were more uniform than expected.</p>
-                                <div class="grid grid-cols-3 gap-5">
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q37" value="A" class="mr-3 h-5 w-5" data-question="37">
-                                        <span>A (the first study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q37" value="B" class="mr-3 h-5 w-5" data-question="37">
-                                        <span>B (the second study)</span>
-                                    </label>
-                                    <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                        <input type="radio" name="q37" value="C" class="mr-3 h-5 w-5" data-question="37">
-                                        <span>C (the third study)</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                      
-                    </div>
-                </section>
-                <!-- Questions 38-40 -->
-                <section id="q38" class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-blue-700 mb-6">Questions 38-40</h3>
-                    <div class="question-container">
-                        <!-- Left Column - Questions -->
-                        <div class="space-y-6">
-                            <div class="question-group bg-gray-50 p-4 rounded-lg">
-                                <h4 class="font-bold text-lg mb-3">A possible explanation for the appeal of flowers</h4>
-                                <p class="mb-2">It has been suggested that our intense response to flowers originates in prehistoric times. The presence of flowers might indicate a potential source of <strong>38.</strong> ________ in a particular location, and primitive humans would search for such signs when looking for a suitable site to raise their <strong>39.</strong> ________. The interpretation of these signs was essential for the survival of our ancestors. However, the problem with this idea is that the plants producing the most attractive flowers do not usually have fruit which is <strong>40.</strong> ________.</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Right Column - Answer Options -->
-                        <div class="space-y-6">
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 38:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="38" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 39:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="39" placeholder="Type your answer here...">
-                            </div>
-                            
-                            <div class="answer-group">
-                                <p class="text-gray-600 mb-2">Answer for question 40:</p>
-                                <input type="text" class="w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" data-question="40" placeholder="Type your answer here...">
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+    <main class="container mx-auto p-4">
+      <!-- Test Selection Page -->
+      <div id="test-selection-page">
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold text-blue-800 mb-4">
+            📚 IELTS Reading Practice
+          </h1>
+          <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+            Practice with real IELTS reading tests. Improve your skills and
+            track your progress.
+          </p>
+          <div class="mt-8">
+            <button
+              onclick="openAdminPanel()"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 inline-flex items-center"
+            >
+              <i class="fas fa-cog mr-2"></i>Admin Panel
+            </button>
+          </div>
         </div>
+
+        <!-- Test Cards -->
+        <div
+          id="test-cards-container"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <!-- Tests will be loaded here -->
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="text-center py-12">
+          <div
+            class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"
+          ></div>
+          <p class="text-gray-600">Loading tests...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+          <div class="text-6xl text-gray-400 mb-4">📚</div>
+          <h3 class="text-xl font-bold text-gray-600 mb-2">
+            No Tests Available
+          </h3>
+          <p class="text-gray-500 mb-6">Check back later or contact admin.</p>
+          <button
+            onclick="openAdminPanel()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+          >
+            <i class="fas fa-cog mr-2"></i>Admin Panel
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Interface Page -->
+      <div id="test-interface-page" class="hidden space-y-8 flex">
+        <!-- Passage Side -->
+        <div class="w-[50%] h-[100vh] overflow-y-auto passage-scrollbar">
+          <h3 id="passage-title-display" class="text-2xl font-bold mb-6"></h3>
+          <div id="passage-content-display" class="prose max-w-none">
+            <!-- Passage will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Questions Side -->
+        <div class="w-[50%] h-[100vh] overflow-y-auto">
+          <div id="questions-container">
+            <!-- Questions will be loaded here -->
+          </div>
+        </div>
+      </div>
     </main>
 
-    <!-- Question Navigation Bar (Compact) -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-3 z-40">
-        <div class="container mx-auto">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-bold text-gray-700">Question Navigation</h3>
-                <div class="text-gray-600 text-sm">
-                    <span id="answered-count">0</span>/40 answered
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-1 max-h-20 overflow-y-auto" id="question-nav">
-                <!-- Question numbers will be dynamically inserted here -->
-            </div>
+    <!-- Question Navigation -->
+    <div
+      id="question-navigation"
+      class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-3 z-40 hidden"
+    >
+      <div class="container mx-auto">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="font-bold text-gray-700">Question Navigation</h3>
+          <div class="text-gray-600 text-sm">
+            <span id="answered-count">0</span>/<span id="total-questions"
+              >0</span
+            >
+            answered
+          </div>
         </div>
+        <div
+          class="flex flex-wrap gap-1 max-h-20 overflow-y-auto"
+          id="question-nav"
+        >
+          <!-- Question numbers will be inserted here -->
+        </div>
+      </div>
     </div>
 
     <!-- Result Modal -->
-    <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" style="animation: fadeIn 0.3s;">
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full" style="animation: slideUp 0.5s;">
-            <div class="p-8">
-                <h2 class="text-3xl font-bold text-blue-800 mb-6">Test Results</h2>
-                
-                <div class="grid grid-cols-2 gap-6 mb-8">
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <p class="text-gray-600">Total Questions</p>
-                        <p id="total-questions" class="text-3xl font-bold text-blue-700">40</p>
-                    </div>
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <p class="text-gray-600">Correct Answers</p>
-                        <p id="correct-answers" class="text-3xl font-bold text-green-700">0</p>
-                    </div>
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <p class="text-gray-600">Answered Questions</p>
-                        <p id="answered-questions" class="text-3xl font-bold text-yellow-700">0</p>
-                    </div>
-                    <div class="bg-red-50 p-4 rounded-lg">
-                        <p class="text-gray-600">Incorrect Answers</p>
-                        <p id="incorrect-answers" class="text-3xl font-bold text-red-700">0</p>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                    <h3 class="text-xl font-bold text-gray-700 mb-4">Time Spent</h3>
-                    <p id="time-spent" class="text-2xl font-bold">00:00</p>
-                </div>
-                
-                <div class="flex justify-between">
-                    <button id="close-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300">
-                        Close
-                    </button>
-                    <button id="restart-test" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                        Restart Test
-                    </button>
-                </div>
+    <div
+      id="result-modal"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-xl shadow-2xl max-w-2xl w-full"
+        style="animation: slideUp 0.5s"
+      >
+        <div class="p-8">
+          <h2 class="text-3xl font-bold text-blue-800 mb-6">Test Results</h2>
+
+          <div class="grid grid-cols-2 gap-6 mb-8">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <p class="text-gray-600">Total Questions</p>
+              <p
+                id="total-questions-result"
+                class="text-3xl font-bold text-blue-700"
+              >
+                0
+              </p>
             </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+              <p class="text-gray-600">Correct Answers</p>
+              <p id="correct-answers" class="text-3xl font-bold text-green-700">
+                0
+              </p>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <p class="text-gray-600">Answered Questions</p>
+              <p
+                id="answered-questions"
+                class="text-3xl font-bold text-yellow-700"
+              >
+                0
+              </p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg">
+              <p class="text-gray-600">Incorrect Answers</p>
+              <p id="incorrect-answers" class="text-3xl font-bold text-red-700">
+                0
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 p-6 rounded-lg mb-8">
+            <h3 class="text-xl font-bold text-gray-700 mb-4">Time Spent</h3>
+            <p id="time-spent" class="text-2xl font-bold">00:00</p>
+          </div>
+
+          <div class="flex justify-between">
+            <button
+              onclick="closeResults()"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300"
+            >
+              Close
+            </button>
+            <button
+              onclick="backToTests()"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+            >
+              Back to Tests
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <script>
-        // Test Data - Correct Answers
-        const correctAnswers = {
-            // Passage 1
-            1: "timetable",
-            2: "surface",
-            3: "accommodation",
-            4: "restaurant",
-            5: "region",
-            6: "numbers",
-            7: "TRUE",
-            8: "FALSE",
-            9: "NOT GIVEN",
-            10: "FALSE",
-            11: "NOT GIVEN",
-            12: "FALSE",
-            13: "NOT GIVEN",
-            
-            // Passage 2
-            14: "E",
-            15: "I",
-            16: "A",
-            17: "G",
-            18: "C",
-            19: "F",
-            20: ["A", "E"],
-            22: ["B", "D"],
-            24: "sheltered",
-            25: "penguins",
-            26: "permit",
-            
-            // Passage 3
-            27: "v",
-            28: "i",
-            29: "iii",
-            30: "iv",
-            31: "vi",
-            32: "vii",
-            33: "viii",
-            34: "B",
-            35: "A",
-            36: "C",
-            37: "B",
-            38: "food",
-            39: "children",
-            40: "edible"
-        };
+      // ==================== GLOBAL VARIABLES ====================
+      let allTests = [];
+      let currentTest = null;
+      let timerInterval = null;
+      let timeLeft = 60 * 60;
+      let timeSpent = 0;
+      let isTimerPaused = false;
+      let userAnswers = {};
+      let questionStates = {};
 
-        // Timer Logic with pause functionality
-        let totalTime = 60 * 60; // 60 minutes in seconds
-        let timerInterval;
-        let timeSpent = 0;
-        let testActive = true;
-        let timerPaused = false;
+      // ==================== PAGE LOAD ====================
+      document.addEventListener("DOMContentLoaded", function () {
+        loadTestsFromStorage();
+        displayTestCards();
+      });
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                if (totalTime <= 0) {
-                    clearInterval(timerInterval);
-                    submitTest();
-                    return;
-                }
-                
-                if (!timerPaused) {
-                    totalTime--;
-                    timeSpent++;
-                    updateTimerDisplay();
-                }
-            }, 1000);
+      // ==================== ADMIN ACCESS ====================
+      function openAdminPanel() {
+        document
+          .getElementById("admin-password-modal")
+          .classList.remove("hidden");
+        document.getElementById("admin-password-modal").classList.add("flex");
+      }
+
+      function closeAdminModal() {
+        document.getElementById("admin-password-modal").classList.add("hidden");
+        document.getElementById("admin-login-password").value = "";
+        document.getElementById("password-error").classList.add("hidden");
+      }
+
+      function checkAdminPassword() {
+        const password = document.getElementById("admin-login-password").value;
+        const savedPassword =
+          localStorage.getItem("ielts_admin_password") || "admin123";
+
+        if (password === savedPassword) {
+          localStorage.setItem("ielts_is_admin", "true");
+          window.open("admin-panel.html", "_blank");
+          closeAdminModal();
+        } else {
+          document.getElementById("password-error").classList.remove("hidden");
+          document.getElementById("admin-login-password").value = "";
         }
+      }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(totalTime / 60);
-            const seconds = totalTime % 60;
-            document.getElementById('timer').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      // ==================== TEST SELECTION ====================
+      function loadTestsFromStorage() {
+        try {
+          const savedTests = localStorage.getItem("ielts_tests");
+          allTests = savedTests ? JSON.parse(savedTests) : [];
+        } catch (error) {
+          allTests = [];
         }
+      }
 
-        function toggleTimer() {
-            timerPaused = !timerPaused;
-            const pauseButton = document.getElementById('pause-timer');
-            if (timerPaused) {
-                pauseButton.innerHTML = '<i class="fas fa-play"></i> Resume';
-                pauseButton.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                pauseButton.classList.add('bg-green-500', 'hover:bg-green-600');
-            } else {
-                pauseButton.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                pauseButton.classList.remove('bg-green-500', 'hover:bg-green-600');
-                pauseButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-            }
-        }
+      function displayTestCards() {
+        const container = document.getElementById("test-cards-container");
+        const loading = document.getElementById("loading-state");
+        const empty = document.getElementById("empty-state");
 
-        // Answer Tracking
-        let userAnswers = {};
-        let questionStates = {};
+        loading.classList.remove("hidden");
+        empty.classList.add("hidden");
+        container.innerHTML = "";
 
-        function initializeQuestionNavigation() {
-            const navContainer = document.getElementById('question-nav');
-            
-            // Create 40 question buttons
-            for (let i = 1; i <= 40; i++) {
-                const button = document.createElement('button');
-                button.className = 'question-nav-btn w-8 h-8 rounded-full border flex items-center justify-center transition duration-300 text-sm';
-                button.textContent = i;
-                button.dataset.question = i;
-                
-                // Set initial state (unanswered)
-                button.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
-                questionStates[i] = 'unanswered';
-                
-                // Add click event to scroll to question
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    scrollToQuestion(i);
-                });
-                
-                navContainer.appendChild(button);
-            }
-            
-            // Initialize first question as current
-            updateCurrentQuestion(1);
-        }
+        setTimeout(() => {
+          loading.classList.add("hidden");
 
-        function scrollToQuestion(questionNum) {
-            const questionId = `q${questionNum}`;
-            const questionElement = document.getElementById(questionId);
-            if (questionElement) {
-                // Calculate offset for header
-                const headerHeight = 80;
-                const offsetPosition = questionElement.offsetTop - headerHeight - 10;
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-                
-                // Update currently visible question
-                updateCurrentQuestion(questionNum);
-            } else {
-                console.log(`Question ${questionNum} not found!`);
-            }
-        }
+          if (allTests.length === 0) {
+            empty.classList.remove("hidden");
+            return;
+          }
 
-        function updateCurrentQuestion(questionNum) {
-            // Reset all buttons
-            document.querySelectorAll('.question-nav-btn').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'bg-blue-100', 'text-blue-700');
-            });
-            
-            // Highlight current question
-            const currentBtn = document.querySelector(`.question-nav-btn[data-question="${questionNum}"]`);
-            if (currentBtn) {
-                currentBtn.classList.add('border-blue-500', 'bg-blue-100', 'text-blue-700');
-            }
-        }
-
-        function updateQuestionState(questionNum, state) {
-            const button = document.querySelector(`.question-nav-btn[data-question="${questionNum}"]`);
-            if (!button) return;
-            
-            // Remove previous state classes
-            button.classList.remove('bg-white', 'bg-blue-500', 'bg-green-500', 'border-gray-300', 'border-blue-500', 'border-blue-500', 'bg-blue-100', 'text-blue-700');
-            
-            // Apply new state
-            switch(state) {
-                case 'unanswered':
-                    button.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
-                    questionStates[questionNum] = 'unanswered';
-                    break;
-                case 'answered':
-                    button.classList.add('bg-blue-500', 'text-white');
-                    questionStates[questionNum] = 'answered';
-                    break;
-                case 'current':
-                    button.classList.add('border-blue-500', 'bg-blue-100', 'text-blue-700');
-                    break;
-            }
-            
-            updateAnsweredCount();
-        }
-
-        function updateAnsweredCount() {
-            const answeredCount = Object.values(questionStates).filter(state => state === 'answered').length;
-            document.getElementById('answered-count').textContent = answeredCount;
-            document.getElementById('answered-questions').textContent = answeredCount;
-        }
-
-        // Handle checkbox groups (questions 20-21 and 22-23)
-        function setupCheckboxGroups() {
-            // Group 20-21
-            const checkboxes20_21 = document.querySelectorAll('input[data-group="20-21"]');
-            checkboxes20_21.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const checkedCount = Array.from(checkboxes20_21).filter(cb => cb.checked).length;
-                    
-                    // If more than 2 are checked, uncheck the current one
-                    if (checkedCount > 2) {
-                        this.checked = false;
-                    }
-                    
-                    // Update answer states
-                    collectAnswers();
-                });
-            });
-            
-            // Group 22-23
-            const checkboxes22_23 = document.querySelectorAll('input[data-group="22-23"]');
-            checkboxes22_23.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const checkedCount = Array.from(checkboxes22_23).filter(cb => cb.checked).length;
-                    
-                    // If more than 2 are checked, uncheck the current one
-                    if (checkedCount > 2) {
-                        this.checked = false;
-                    }
-                    
-                    // Update answer states
-                    collectAnswers();
-                });
-            });
-        }
-
-        // Answer Collection
-        function collectAnswers() {
-            // Reset user answers
-            userAnswers = {};
-            
-            // Collect answers from all input types
-            document.querySelectorAll('input, select').forEach(input => {
-                const questionNum = parseInt(input.dataset.question);
-                if (!questionNum) return;
-                
-                if (input.type === 'radio') {
-                    if (input.checked) {
-                        userAnswers[questionNum] = input.value;
-                    }
-                } 
-                else if (input.type === 'checkbox') {
-                    if (!userAnswers[questionNum]) {
-                        userAnswers[questionNum] = [];
-                    }
-                    if (input.checked) {
-                        // Check if value already exists
-                        if (!userAnswers[questionNum].includes(input.value)) {
-                            userAnswers[questionNum].push(input.value);
-                        }
-                    } else {
-                        // Remove if unchecked
-                        const index = userAnswers[questionNum].indexOf(input.value);
-                        if (index > -1) {
-                            userAnswers[questionNum].splice(index, 1);
-                        }
-                    }
-                }
-                else if (input.type === 'text') {
-                    if (input.value.trim() !== '') {
-                        userAnswers[questionNum] = input.value.trim().toLowerCase();
-                    }
-                }
-                else if (input.tagName === 'SELECT') {
-                    if (input.value !== '') {
-                        userAnswers[questionNum] = input.value;
-                    }
-                }
-            });
-            
-            // Update question states
-            for (let i = 1; i <= 40; i++) {
-                if (userAnswers[i] && 
-                    ((Array.isArray(userAnswers[i]) && userAnswers[i].length > 0) || 
-                     (!Array.isArray(userAnswers[i]) && userAnswers[i] !== ''))) {
-                    updateQuestionState(i, 'answered');
-                } else {
-                    updateQuestionState(i, 'unanswered');
-                }
-            }
-        }
-
-        // Test Submission
-        function submitTest() {
-            if (!testActive) return;
-            
-            testActive = false;
-            clearInterval(timerInterval);
-            collectAnswers();
-            
-            // Disable all inputs
-            document.querySelectorAll('input, select').forEach(input => {
-                input.disabled = true;
-            });
-            
-            // Disable pause button
-            document.getElementById('pause-timer').disabled = true;
-            
-            // Calculate results
-            let correctCount = 0;
-            let answeredCount = 0;
-            
-            for (let i = 1; i <= 40; i++) {
-                if (userAnswers[i] && 
-                    ((Array.isArray(userAnswers[i]) && userAnswers[i].length > 0) || 
-                     (!Array.isArray(userAnswers[i]) && userAnswers[i] !== ''))) {
-                    answeredCount++;
-                    
-                    // For questions with multiple correct answers (20, 22)
-                    if (Array.isArray(correctAnswers[i])) {
-                        const userAns = Array.isArray(userAnswers[i]) ? userAnswers[i] : [userAnswers[i]];
-                        const correctAns = correctAnswers[i];
+          container.innerHTML = allTests
+            .map(
+              (test, index) => `
+                    <div class="test-card bg-white rounded-xl shadow-lg p-6" onclick="startTest(${index})">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-blue-700 mb-2">${
+                                  test.title || "IELTS Test"
+                                }</h3>
+                                <p class="text-gray-600 text-sm mb-3">${
+                                  test.passage?.title || "Reading Passage"
+                                }</p>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
+                                ${test.questions?.length || 0} Q
+                            </span>
+                        </div>
                         
-                        // Sort arrays for comparison
-                        const userSorted = [...userAns].sort();
-                        const correctSorted = [...correctAns].sort();
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>${test.duration || 60} minutes</span>
+                        </div>
                         
-                        // Check if arrays are equal
-                        if (userSorted.length === correctSorted.length && 
-                            userSorted.every((value, index) => value === correctSorted[index])) {
-                            correctCount++;
-                        }
-                    }
-                    // For single answer questions
-                    else if (userAnswers[i] === correctAnswers[i]) {
-                        correctCount++;
-                    }
-                }
-            }
-            
-            // Update modal with results
-            document.getElementById('total-questions').textContent = '40';
-            document.getElementById('correct-answers').textContent = correctCount;
-            document.getElementById('incorrect-answers').textContent = answeredCount - correctCount;
-            
-            // Format time spent
-            const minutesSpent = Math.floor(timeSpent / 60);
-            const secondsSpent = timeSpent % 60;
-            document.getElementById('time-spent').textContent = 
-                `${minutesSpent.toString().padStart(2, '0')}:${secondsSpent.toString().padStart(2, '0')}`;
-            
-            // Show modal
-            document.getElementById('result-modal').classList.remove('hidden');
-            document.getElementById('result-modal').classList.add('flex');
-            
-            // Scroll to top to show modal properly
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+                        <div class="flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                <i class="fas fa-calendar mr-1"></i>
+                                ${new Date(
+                                  parseInt(test.id)
+                                ).toLocaleDateString()}
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                                Start Test <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+        }, 800);
+      }
+
+      // ==================== TEST INTERFACE ====================
+      function startTest(testIndex) {
+        currentTest = allTests[testIndex];
+
+        // Show test interface
+        document.getElementById("test-selection-page").classList.add("hidden");
+        document
+          .getElementById("test-interface-page")
+          .classList.remove("hidden");
+        document.getElementById("main-header").classList.remove("hidden");
+        document
+          .getElementById("question-navigation")
+          .classList.remove("hidden");
+
+        // Display passage
+        document.getElementById("passage-title-display").textContent =
+          currentTest.passage?.title || "Reading Passage";
+        document.getElementById("passage-content-display").innerHTML =
+          currentTest.passage?.content || "";
+
+        // Display questions
+        displayQuestions();
+
+        // Setup timer
+        timeLeft = (currentTest.duration || 60) * 60;
+        timeSpent = 0;
+        isTimerPaused = false;
+        startTimer();
+
+        // Initialize answers
+        userAnswers = {};
+        questionStates = {};
+
+        // Setup navigation
+        setupQuestionNavigation();
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function displayQuestions() {
+        const container = document.getElementById("questions-container");
+        container.innerHTML = "";
+
+        if (!currentTest.questions || currentTest.questions.length === 0) {
+          container.innerHTML =
+            '<p class="text-gray-500 p-6">No questions available.</p>';
+          return;
         }
 
-        // Initialize Event Listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            // Start timer
-            startTimer();
-            updateTimerDisplay();
-            
-            // Initialize question navigation
-            initializeQuestionNavigation();
-            
-            // Set up checkbox groups
-            setupCheckboxGroups();
-            
-            // Set up answer change listeners
-            document.querySelectorAll('input, select').forEach(input => {
-                input.addEventListener('change', () => {
-                    collectAnswers();
-                });
-                
-                // For text inputs
-                if (input.type === 'text') {
-                    input.addEventListener('input', () => {
-                        collectAnswers();
-                    });
-                }
-            });
-            
-            // Submit button
-            document.getElementById('submit-test').addEventListener('click', submitTest);
-            
-            // Pause timer button
-            document.getElementById('pause-timer').addEventListener('click', toggleTimer);
-            
-            // Modal buttons
-            document.getElementById('close-modal').addEventListener('click', () => {
-                document.getElementById('result-modal').classList.add('hidden');
-                document.getElementById('result-modal').classList.remove('flex');
-            });
-            
-            document.getElementById('restart-test').addEventListener('click', () => {
-                location.reload();
-            });
-            
-            // Track scroll to update current question
-            let scrollTimeout;
-            window.addEventListener('scroll', () => {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    // Find which question is currently in view
-                    for (let i = 1; i <= 40; i++) {
-                        const questionElement = document.getElementById(`q${i}`);
-                        if (questionElement) {
-                            const rect = questionElement.getBoundingClientRect();
-                            const headerHeight = 80;
-                            // Check if question is in view (considering header height)
-                            if (rect.top >= headerHeight && rect.top <= window.innerHeight / 2 + headerHeight) {
-                                updateCurrentQuestion(i);
-                                break;
-                            }
-                        }
-                    }
-                }, 100);
-            });
-            
-            // Ensure all questions are accessible
-            window.addEventListener('load', () => {
-                // Check if last questions exist
-                const lastQuestion = document.getElementById('q38');
-                if (lastQuestion) {
-                    console.log('All question sections loaded successfully');
-                }
-                
-                // Initialize scroll for first question
-                setTimeout(() => {
-                    updateCurrentQuestion(1);
-                }, 500);
-            });
+        // Group questions by sections
+        let currentSection = 1;
+        let sectionStart = 1;
+        let sectionHTML = "";
+
+        currentTest.questions.forEach((question, index) => {
+          if (index === 0 || question.number === 1) {
+            if (sectionHTML) {
+              container.innerHTML += sectionHTML;
+            }
+            const sectionEnd = Math.min(
+              question.number + 5,
+              currentTest.questions.length
+            );
+            sectionHTML = `
+                        <section class="bg-white p-6 rounded-xl shadow-lg mb-6">
+                            <h3 class="text-xl font-bold text-blue-700 mb-6">Questions ${question.number}-${sectionEnd}</h3>
+                            <div class="space-y-6">
+                    `;
+            sectionStart = question.number;
+          }
+
+          // Add question
+          sectionHTML += generateQuestionHTML(question);
+
+          // Close section if last question or next starts new section
+          if (
+            index === currentTest.questions.length - 1 ||
+            currentTest.questions[index + 1]?.number === 1
+          ) {
+            sectionHTML += `
+                            </div>
+                        </section>
+                    `;
+            container.innerHTML += sectionHTML;
+          }
         });
 
-        // Make scrollToQuestion function globally available
-        window.scrollToQuestion = scrollToQuestion;
+        // Add event listeners
+        document.querySelectorAll(".answer-input").forEach((input) => {
+          input.addEventListener("change", saveUserAnswer);
+          if (input.type === "text") {
+            input.addEventListener("input", saveUserAnswer);
+          }
+        });
+      }
+
+      function generateQuestionHTML(question) {
+        if (!question) return "";
+
+        switch (question.type) {
+          case "short-answer":
+          case "sentence-completion":
+            return `
+                        <div class="question-group" data-question="${question.number}">
+                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
+                            <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
+                                   data-question="${question.number}" placeholder="Type your answer here...">
+                        </div>
+                    `;
+
+          case "true-false-notgiven":
+            return `
+                        <div class="question-group" data-question="${question.number}">
+                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
+                            <div class="grid grid-cols-3 gap-5">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="q${question.number}" value="TRUE" 
+                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
+                                    <span>TRUE</span>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="q${question.number}" value="FALSE" 
+                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
+                                    <span>FALSE</span>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="q${question.number}" value="NOT GIVEN" 
+                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
+                                    <span>NOT GIVEN</span>
+                                </label>
+                            </div>
+                        </div>
+                    `;
+
+          case "multiple-choice":
+            let optionsHTML = "";
+            if (question.options) {
+              Object.entries(question.options).forEach(([letter, text]) => {
+                optionsHTML += `
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="radio" name="q${question.number}" value="${letter}" 
+                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
+                                    <span>${letter}. ${text}</span>
+                                </label>
+                            `;
+              });
+            }
+
+            return `
+                        <div class="question-group" data-question="${question.number}">
+                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
+                            <div class="space-y-3">
+                                ${optionsHTML}
+                            </div>
+                        </div>
+                    `;
+
+          default:
+            return `
+                        <div class="question-group" data-question="${question.number}">
+                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
+                            <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
+                                   data-question="${question.number}" placeholder="Type your answer here...">
+                        </div>
+                    `;
+        }
+      }
+
+      // ==================== TIMER FUNCTIONS ====================
+      function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+          if (!isTimerPaused) {
+            timeLeft--;
+            timeSpent++;
+
+            if (timeLeft <= 0) {
+              clearInterval(timerInterval);
+              submitTest();
+              return;
+            }
+
+            updateTimerDisplay();
+          }
+        }, 1000);
+
+        updateTimerDisplay();
+      }
+
+      function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById("timer").textContent = `${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      // ==================== ANSWER HANDLING ====================
+      function saveUserAnswer(event) {
+        const questionNum = parseInt(event.target.dataset.question);
+
+        if (event.target.type === "radio") {
+          userAnswers[questionNum] = event.target.value;
+        } else if (event.target.type === "text") {
+          userAnswers[questionNum] = event.target.value.trim().toLowerCase();
+        }
+
+        updateQuestionState(questionNum, "answered");
+        updateAnsweredCount();
+      }
+
+      function updateQuestionState(questionNum, state) {
+        const button = document.querySelector(
+          `.question-nav-btn[data-question="${questionNum}"]`
+        );
+        if (!button) return;
+
+        button.classList.remove("bg-white", "bg-blue-500");
+
+        if (state === "answered") {
+          button.classList.add("bg-blue-500", "text-white");
+          questionStates[questionNum] = "answered";
+        }
+      }
+
+      function updateAnsweredCount() {
+        const answeredCount = Object.values(questionStates).filter(
+          (state) => state === "answered"
+        ).length;
+        const totalQuestions = currentTest?.questions?.length || 0;
+
+        document.getElementById("answered-count").textContent = answeredCount;
+        document.getElementById("total-questions").textContent = totalQuestions;
+        document.getElementById("answered-questions").textContent =
+          answeredCount;
+      }
+
+      function setupQuestionNavigation() {
+        const navContainer = document.getElementById("question-nav");
+        navContainer.innerHTML = "";
+
+        if (!currentTest.questions) return;
+
+        currentTest.questions.forEach((question) => {
+          const button = document.createElement("button");
+          button.className =
+            "question-nav-btn w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100";
+          button.textContent = question.number;
+          button.dataset.question = question.number;
+          button.onclick = () => scrollToQuestion(question.number);
+          navContainer.appendChild(button);
+        });
+
+        updateAnsweredCount();
+      }
+
+      function scrollToQuestion(questionNumber) {
+        const questionElement = document.querySelector(
+          `[data-question="${questionNumber}"]`
+        );
+        if (questionElement) {
+          questionElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }
+
+      // ==================== TEST SUBMISSION ====================
+      function submitTest() {
+        if (timerInterval) clearInterval(timerInterval);
+
+        // Disable inputs
+        document.querySelectorAll(".answer-input").forEach((input) => {
+          input.disabled = true;
+        });
+
+        // Calculate results
+        let correctCount = 0;
+        let totalQuestions = currentTest.questions?.length || 0;
+
+        if (currentTest.correctAnswers) {
+          currentTest.questions?.forEach((question) => {
+            const userAnswer = userAnswers[question.number];
+            const correctAnswer = currentTest.correctAnswers[question.number];
+
+            if (userAnswer && correctAnswer) {
+              const isCorrect =
+                userAnswer.toString().toLowerCase() ===
+                correctAnswer.toString().toLowerCase();
+              if (isCorrect) correctCount++;
+
+              // Highlight answers
+              highlightAnswer(question.number, isCorrect);
+            }
+          });
+        }
+
+        // Show results modal
+        showResults(correctCount, totalQuestions);
+      }
+
+      function highlightAnswer(questionNumber, isCorrect) {
+        const questionDiv = document.querySelector(
+          `[data-question="${questionNumber}"]`
+        );
+        if (!questionDiv) return;
+
+        const inputs = questionDiv.querySelectorAll(".answer-input");
+        inputs.forEach((input) => {
+          if (isCorrect) {
+            input.classList.add("border-green-500", "bg-green-50");
+          } else {
+            input.classList.add("border-red-500", "bg-red-50");
+          }
+        });
+      }
+
+      function showResults(correctCount, totalQuestions) {
+        document.getElementById("total-questions-result").textContent =
+          totalQuestions;
+        document.getElementById("correct-answers").textContent = correctCount;
+        document.getElementById("incorrect-answers").textContent =
+          totalQuestions - correctCount;
+
+        // Format time spent
+        const minutesSpent = Math.floor(timeSpent / 60);
+        const secondsSpent = timeSpent % 60;
+        document.getElementById("time-spent").textContent = `${minutesSpent
+          .toString()
+          .padStart(2, "0")}:${secondsSpent.toString().padStart(2, "0")}`;
+
+        // Show modal
+        document.getElementById("result-modal").classList.remove("hidden");
+        document.getElementById("result-modal").classList.add("flex");
+      }
+
+      function closeResults() {
+        document.getElementById("result-modal").classList.add("hidden");
+      }
+
+      function backToTests() {
+        closeResults();
+        document.getElementById("test-interface-page").classList.add("hidden");
+        document
+          .getElementById("test-selection-page")
+          .classList.remove("hidden");
+        document.getElementById("main-header").classList.add("hidden");
+        document.getElementById("question-navigation").classList.add("hidden");
+
+        // Refresh tests list
+        loadTestsFromStorage();
+        displayTestCards();
+      }
+
+      // ==================== AUTO REFRESH ====================
+      // Check for new tests every 3 seconds
+      setInterval(() => {
+        loadTestsFromStorage();
+        if (
+          document
+            .getElementById("test-selection-page")
+            .classList.contains("hidden") === false
+        ) {
+          displayTestCards();
+        }
+      }, 3000);
+      document
+        .getElementById("pause-timer")
+        .addEventListener("click", function () {
+          isTimerPaused = !isTimerPaused;
+
+          if (isTimerPaused) {
+            this.innerHTML = '<i class="fas fa-play"></i> Resume';
+          } else {
+            this.innerHTML = '<i class="fas fa-pause"></i> Pause';
+          }
+        });
+      document
+        .getElementById("submit-test")
+        .addEventListener("click", function () {
+          submitTest();
+        });
+
+        document.getElementById("back-to-tests").addEventListener("click", function () {
+  if (timerInterval) clearInterval(timerInterval);
+
+  document.getElementById('test-interface-page').classList.add('hidden');
+  document.getElementById('test-selection-page').classList.remove('hidden');
+  document.getElementById('main-header').classList.add('hidden');
+  document.getElementById('question-navigation').classList.add('hidden');
+
+  loadTestsFromStorage();
+  displayTestCards();
+});
+
     </script>
-</body>
+  </body>
 </html>
