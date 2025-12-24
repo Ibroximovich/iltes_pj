@@ -77,6 +77,49 @@
       .password-modal-content {
         animation: slideUp 0.5s ease;
       }
+
+      /* Correct/Incorrect answer highlighting */
+      .correct-answer {
+        background-color: #d1fae5 !important;
+        border-color: #10b981 !important;
+        color: #065f46 !important;
+      }
+      
+      .incorrect-answer {
+        background-color: #fee2e2 !important;
+        border-color: #ef4444 !important;
+        color: #991b1b !important;
+      }
+      
+      .correct-radio {
+        background-color: #d1fae5 !important;
+        border-color: #10b981 !important;
+      }
+      
+      .incorrect-radio {
+        background-color: #fee2e2 !important;
+        border-color: #ef4444 !important;
+      }
+      
+      .correct-text {
+        border: 2px solid #10b981 !important;
+        background-color: #d1fae5 !important;
+      }
+      
+      .incorrect-text {
+        border: 2px solid #ef4444 !important;
+        background-color: #fee2e2 !important;
+      }
+      
+      .show-answer-btn {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border: none !important;
+      }
+      
+      .show-answer-btn:hover {
+        background-color: #2563eb !important;
+      }
     </style>
   </head>
   <body class="bg-gray-50">
@@ -286,13 +329,13 @@
       class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"
     >
       <div
-        class="bg-white rounded-xl shadow-2xl max-w-2xl w-full"
+        class="bg-white rounded-xl shadow-2xl max-w-4xl w-full"
         style="animation: slideUp 0.5s"
       >
         <div class="p-8">
           <h2 class="text-3xl font-bold text-blue-800 mb-6">Test Results</h2>
 
-          <div class="grid grid-cols-2 gap-6 mb-8">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-blue-50 p-4 rounded-lg">
               <p class="text-gray-600">Total Questions</p>
               <p
@@ -330,6 +373,13 @@
             <p id="time-spent" class="text-2xl font-bold">00:00</p>
           </div>
 
+          <div class="mb-6">
+            <h3 class="text-xl font-bold text-gray-700 mb-4">Detailed Results</h3>
+            <div id="detailed-results" class="space-y-4 max-h-80 overflow-y-auto">
+              <!-- Detailed results will be shown here -->
+            </div>
+          </div>
+
           <div class="flex justify-between">
             <button
               onclick="closeResults()"
@@ -342,6 +392,12 @@
               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
             >
               Back to Tests
+            </button>
+            <button
+              onclick="reviewAnswers()"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+            >
+              <i class="fas fa-eye mr-2"></i>Review Answers
             </button>
           </div>
         </div>
@@ -358,11 +414,32 @@
       let isTimerPaused = false;
       let userAnswers = {};
       let questionStates = {};
+      let testResults = [];
+      let currentTestIndex = -1;
 
       // ==================== PAGE LOAD ====================
       document.addEventListener("DOMContentLoaded", function () {
         loadTestsFromStorage();
         displayTestCards();
+        
+        // Check if user was in the middle of a test
+        const savedTestProgress = localStorage.getItem('ielts_test_progress');
+        if (savedTestProgress) {
+          const progress = JSON.parse(savedTestProgress);
+          if (progress.testIndex !== undefined && progress.userAnswers) {
+            const confirmRestore = confirm("You have an unfinished test. Would you like to continue where you left off?");
+            if (confirmRestore) {
+              startTest(progress.testIndex);
+              // Restore previous answers
+              setTimeout(() => {
+                restoreAnswers(progress.userAnswers);
+              }, 500);
+            } else {
+              // Clear saved progress
+              localStorage.removeItem('ielts_test_progress');
+            }
+          }
+        }
       });
 
       // ==================== ADMIN ACCESS ====================
@@ -464,6 +541,7 @@
 
       // ==================== TEST INTERFACE ====================
       function startTest(testIndex) {
+        currentTestIndex = testIndex;
         currentTest = allTests[testIndex];
 
         // Show test interface
@@ -500,6 +578,50 @@
 
         // Scroll to top
         window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Auto-save progress every 10 seconds
+        setInterval(() => {
+          if (currentTest) {
+            saveTestProgress();
+          }
+        }, 10000);
+      }
+
+      function saveTestProgress() {
+        const progress = {
+          testIndex: currentTestIndex,
+          userAnswers: userAnswers,
+          timeLeft: timeLeft,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('ielts_test_progress', JSON.stringify(progress));
+      }
+
+      function restoreAnswers(savedAnswers) {
+        if (!savedAnswers) return;
+        
+        userAnswers = { ...savedAnswers };
+        
+        // Update UI with saved answers
+        Object.entries(savedAnswers).forEach(([questionNum, answer]) => {
+          const questionNumInt = parseInt(questionNum);
+          
+          // For radio buttons
+          const radioInput = document.querySelector(`input[name="q${questionNumInt}"][value="${answer}"]`);
+          if (radioInput) {
+            radioInput.checked = true;
+            updateQuestionState(questionNumInt, "answered");
+          }
+          
+          // For text inputs
+          const textInput = document.querySelector(`input[type="text"][data-question="${questionNumInt}"]`);
+          if (textInput) {
+            textInput.value = answer;
+            updateQuestionState(questionNumInt, "answered");
+          }
+        });
+        
+        updateAnsweredCount();
       }
 
       function displayQuestions() {
@@ -570,6 +692,9 @@
                             <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
                             <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
                                    data-question="${question.number}" placeholder="Type your answer here...">
+                            <div class="correct-answer-display mt-2 hidden">
+                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
+                            </div>
                         </div>
                     `;
 
@@ -578,21 +703,24 @@
                         <div class="question-group" data-question="${question.number}">
                             <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
                             <div class="grid grid-cols-3 gap-5">
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="TRUE">
                                     <input type="radio" name="q${question.number}" value="TRUE" 
                                            class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
                                     <span>TRUE</span>
                                 </label>
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="FALSE">
                                     <input type="radio" name="q${question.number}" value="FALSE" 
                                            class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
                                     <span>FALSE</span>
                                 </label>
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="NOT GIVEN">
                                     <input type="radio" name="q${question.number}" value="NOT GIVEN" 
                                            class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
                                     <span>NOT GIVEN</span>
                                 </label>
+                            </div>
+                            <div class="correct-answer-display mt-2 hidden">
+                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
                             </div>
                         </div>
                     `;
@@ -602,7 +730,7 @@
             if (question.options) {
               Object.entries(question.options).forEach(([letter, text]) => {
                 optionsHTML += `
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="${letter}">
                                     <input type="radio" name="q${question.number}" value="${letter}" 
                                            class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
                                     <span>${letter}. ${text}</span>
@@ -617,6 +745,9 @@
                             <div class="space-y-3">
                                 ${optionsHTML}
                             </div>
+                            <div class="correct-answer-display mt-2 hidden">
+                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
+                            </div>
                         </div>
                     `;
 
@@ -626,6 +757,9 @@
                             <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
                             <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
                                    data-question="${question.number}" placeholder="Type your answer here...">
+                            <div class="correct-answer-display mt-2 hidden">
+                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
+                            </div>
                         </div>
                     `;
         }
@@ -673,6 +807,9 @@
 
         updateQuestionState(questionNum, "answered");
         updateAnsweredCount();
+        
+        // Save progress
+        saveTestProgress();
       }
 
       function updateQuestionState(questionNum, state) {
@@ -681,11 +818,15 @@
         );
         if (!button) return;
 
-        button.classList.remove("bg-white", "bg-blue-500");
+        button.classList.remove("bg-white", "bg-blue-500", "bg-green-500", "bg-red-500");
 
         if (state === "answered") {
           button.classList.add("bg-blue-500", "text-white");
           questionStates[questionNum] = "answered";
+        } else if (state === "correct") {
+          button.classList.add("bg-green-500", "text-white");
+        } else if (state === "incorrect") {
+          button.classList.add("bg-red-500", "text-white");
         }
       }
 
@@ -736,6 +877,9 @@
       function submitTest() {
         if (timerInterval) clearInterval(timerInterval);
 
+        // Clear saved progress
+        localStorage.removeItem('ielts_test_progress');
+
         // Disable inputs
         document.querySelectorAll(".answer-input").forEach((input) => {
           input.disabled = true;
@@ -744,42 +888,37 @@
         // Calculate results
         let correctCount = 0;
         let totalQuestions = currentTest.questions?.length || 0;
+        testResults = [];
 
         if (currentTest.correctAnswers) {
           currentTest.questions?.forEach((question) => {
             const userAnswer = userAnswers[question.number];
             const correctAnswer = currentTest.correctAnswers[question.number];
+            let isCorrect = false;
 
             if (userAnswer && correctAnswer) {
-              const isCorrect =
+              isCorrect =
                 userAnswer.toString().toLowerCase() ===
                 correctAnswer.toString().toLowerCase();
               if (isCorrect) correctCount++;
 
-              // Highlight answers
-              highlightAnswer(question.number, isCorrect);
+              // Save result
+              testResults.push({
+                questionNumber: question.number,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                isCorrect: isCorrect,
+                questionText: question.text
+              });
+
+              // Update navigation button color
+              updateQuestionState(question.number, isCorrect ? "correct" : "incorrect");
             }
           });
         }
 
         // Show results modal
         showResults(correctCount, totalQuestions);
-      }
-
-      function highlightAnswer(questionNumber, isCorrect) {
-        const questionDiv = document.querySelector(
-          `[data-question="${questionNumber}"]`
-        );
-        if (!questionDiv) return;
-
-        const inputs = questionDiv.querySelectorAll(".answer-input");
-        inputs.forEach((input) => {
-          if (isCorrect) {
-            input.classList.add("border-green-500", "bg-green-50");
-          } else {
-            input.classList.add("border-red-500", "bg-red-50");
-          }
-        });
       }
 
       function showResults(correctCount, totalQuestions) {
@@ -796,9 +935,106 @@
           .toString()
           .padStart(2, "0")}:${secondsSpent.toString().padStart(2, "0")}`;
 
+        // Show detailed results
+        showDetailedResults();
+
         // Show modal
         document.getElementById("result-modal").classList.remove("hidden");
         document.getElementById("result-modal").classList.add("flex");
+      }
+
+      function showDetailedResults() {
+        const container = document.getElementById("detailed-results");
+        container.innerHTML = "";
+
+        testResults.forEach(result => {
+          const resultElement = document.createElement("div");
+          resultElement.className = `p-4 rounded-lg ${result.isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
+          
+          resultElement.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold ${result.isCorrect ? 'text-green-800' : 'text-red-800'}">
+                  Question ${result.questionNumber}
+                </h4>
+                <p class="text-gray-600 text-sm mt-1">${result.questionText}</p>
+              </div>
+              <span class="px-3 py-1 rounded-full text-sm font-bold ${result.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${result.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+              </span>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Your Answer</p>
+                <p class="font-medium ${result.isCorrect ? 'text-green-700' : 'text-red-700'}">${result.userAnswer || 'Not answered'}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Correct Answer</p>
+                <p class="font-medium text-green-700">${result.correctAnswer}</p>
+              </div>
+            </div>
+          `;
+          
+          container.appendChild(resultElement);
+        });
+      }
+
+      function reviewAnswers() {
+        closeResults();
+        
+        // Show correct answers for each question
+        currentTest.questions?.forEach(question => {
+          const questionDiv = document.querySelector(`[data-question="${question.number}"]`);
+          if (!questionDiv) return;
+          
+          const correctAnswer = currentTest.correctAnswers[question.number];
+          const userAnswer = userAnswers[question.number];
+          
+          // Show correct answer display
+          const correctAnswerDisplay = questionDiv.querySelector('.correct-answer-display');
+          const correctValueSpan = questionDiv.querySelector('.correct-value');
+          
+          if (correctAnswerDisplay && correctValueSpan) {
+            correctAnswerDisplay.classList.remove('hidden');
+            correctValueSpan.textContent = correctAnswer;
+          }
+          
+          // Highlight user's answer
+          highlightUserAnswer(question.number, userAnswer, correctAnswer);
+        });
+      }
+
+      function highlightUserAnswer(questionNumber, userAnswer, correctAnswer) {
+        const questionDiv = document.querySelector(`[data-question="${questionNumber}"]`);
+        if (!questionDiv) return;
+        
+        // For radio button questions
+        const answerLabels = questionDiv.querySelectorAll('.answer-label');
+        answerLabels.forEach(label => {
+          const value = label.getAttribute('data-value');
+          if (value === userAnswer) {
+            if (userAnswer === correctAnswer) {
+              label.classList.add('correct-radio');
+            } else {
+              label.classList.add('incorrect-radio');
+            }
+          }
+          
+          // Highlight correct answer if user got it wrong
+          if (value === correctAnswer && userAnswer !== correctAnswer) {
+            label.classList.add('correct-answer');
+          }
+        });
+        
+        // For text input questions
+        const textInput = questionDiv.querySelector('input[type="text"]');
+        if (textInput) {
+          if (userAnswer === correctAnswer) {
+            textInput.classList.add('correct-text');
+          } else {
+            textInput.classList.add('incorrect-text');
+          }
+        }
       }
 
       function closeResults() {
@@ -806,6 +1042,9 @@
       }
 
       function backToTests() {
+        // Clear saved progress
+        localStorage.removeItem('ielts_test_progress');
+        
         closeResults();
         document.getElementById("test-interface-page").classList.add("hidden");
         document
@@ -819,6 +1058,41 @@
         displayTestCards();
       }
 
+      // ==================== EVENT LISTENERS ====================
+      document.getElementById("pause-timer").addEventListener("click", function () {
+        isTimerPaused = !isTimerPaused;
+
+        if (isTimerPaused) {
+          this.innerHTML = '<i class="fas fa-play"></i> Resume';
+        } else {
+          this.innerHTML = '<i class="fas fa-pause"></i> Pause';
+        }
+      });
+      
+      document.getElementById("submit-test").addEventListener("click", function () {
+        const confirmSubmit = confirm("Are you sure you want to submit the test?");
+        if (confirmSubmit) {
+          submitTest();
+        }
+      });
+
+      document.getElementById("back-to-tests").addEventListener("click", function () {
+        const confirmLeave = confirm("Leave the test? Your progress will be saved.");
+        if (confirmLeave) {
+          saveTestProgress();
+          
+          if (timerInterval) clearInterval(timerInterval);
+          
+          document.getElementById('test-interface-page').classList.add('hidden');
+          document.getElementById('test-selection-page').classList.remove('hidden');
+          document.getElementById('main-header').classList.add('hidden');
+          document.getElementById('question-navigation').classList.add('hidden');
+
+          loadTestsFromStorage();
+          displayTestCards();
+        }
+      });
+
       // ==================== AUTO REFRESH ====================
       // Check for new tests every 3 seconds
       setInterval(() => {
@@ -831,35 +1105,16 @@
           displayTestCards();
         }
       }, 3000);
-      document
-        .getElementById("pause-timer")
-        .addEventListener("click", function () {
-          isTimerPaused = !isTimerPaused;
 
-          if (isTimerPaused) {
-            this.innerHTML = '<i class="fas fa-play"></i> Resume';
-          } else {
-            this.innerHTML = '<i class="fas fa-pause"></i> Pause';
-          }
-        });
-      document
-        .getElementById("submit-test")
-        .addEventListener("click", function () {
-          submitTest();
-        });
-
-        document.getElementById("back-to-tests").addEventListener("click", function () {
-  if (timerInterval) clearInterval(timerInterval);
-
-  document.getElementById('test-interface-page').classList.add('hidden');
-  document.getElementById('test-selection-page').classList.remove('hidden');
-  document.getElementById('main-header').classList.add('hidden');
-  document.getElementById('question-navigation').classList.add('hidden');
-
-  loadTestsFromStorage();
-  displayTestCards();
-});
-
+      // ==================== PAGE UNLOAD HANDLER ====================
+      window.addEventListener('beforeunload', function (e) {
+        if (currentTest) {
+          saveTestProgress();
+          // Show confirmation dialog
+          e.preventDefault();
+          e.returnValue = 'Your test progress will be saved. Are you sure you want to leave?';
+        }
+      });
     </script>
   </body>
 </html>

@@ -225,6 +225,39 @@
             margin: 15px 0;
         }
         
+        .answer-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .answer-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .answer-option:hover {
+            border-color: #c7d2fe;
+            background: #f8fafc;
+        }
+        
+        .answer-option.selected {
+            border-color: #4f46e5;
+            background: #eef2ff;
+        }
+        
+        .answer-option input[type="radio"] {
+            margin: 0;
+        }
+        
         .message {
             padding: 16px;
             border-radius: 10px;
@@ -328,6 +361,10 @@
             
             .options-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .answer-options {
+                flex-direction: column;
             }
         }
     </style>
@@ -502,14 +539,16 @@
                     
                     <div class="form-group">
                         <label>Question Text</label>
-                        <input type="text" id="text-${questionCount}" placeholder="Enter question text...">
+                        <input type="text" id="text-${questionCount}" placeholder="Enter question text..." class="question-text-input">
                     </div>
                     
                     <div id="options-${questionCount}"></div>
                     
-                    <div class="form-group">
-                        <label>Correct Answer</label>
-                        <input type="text" id="answer-${questionCount}" placeholder="Enter correct answer...">
+                    <div id="answer-field-${questionCount}">
+                        <div class="form-group">
+                            <label>Correct Answer</label>
+                            <input type="text" id="answer-${questionCount}" placeholder="Enter correct answer..." class="answer-text-input">
+                        </div>
                     </div>
                 </div>
             `;
@@ -527,19 +566,45 @@
         function updateQuestionType(questionId) {
             const type = document.getElementById(`type-${questionId}`).value;
             const optionsDiv = document.getElementById(`options-${questionId}`);
+            const answerFieldDiv = document.getElementById(`answer-field-${questionId}`);
             
             if (type === 'multiple-choice') {
                 optionsDiv.innerHTML = `
                     <div class="form-group">
                         <label>Options</label>
                         <div class="options-grid">
-                            <input type="text" id="option-a-${questionId}" placeholder="Option A">
-                            <input type="text" id="option-b-${questionId}" placeholder="Option B">
-                            <input type="text" id="option-c-${questionId}" placeholder="Option C">
-                            <input type="text" id="option-d-${questionId}" placeholder="Option D">
+                            <input type="text" id="option-a-${questionId}" placeholder="Option A" class="option-input" oninput="updateMCLabel('${questionId}', 'A')">
+                            <input type="text" id="option-b-${questionId}" placeholder="Option B" class="option-input" oninput="updateMCLabel('${questionId}', 'B')">
+                            <input type="text" id="option-c-${questionId}" placeholder="Option C" class="option-input" oninput="updateMCLabel('${questionId}', 'C')">
+                            <input type="text" id="option-d-${questionId}" placeholder="Option D" class="option-input" oninput="updateMCLabel('${questionId}', 'D')">
                         </div>
                     </div>
                 `;
+                
+                answerFieldDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Correct Answer</label>
+                        <div class="answer-options" id="mc-answer-${questionId}">
+                            <div class="answer-option" onclick="selectMCAnswer('${questionId}', 'A')">
+                                <input type="radio" name="mc-answer-${questionId}" id="mc-a-${questionId}" value="A">
+                                <label for="mc-a-${questionId}" id="label-mc-a-${questionId}">Option A</label>
+                            </div>
+                            <div class="answer-option" onclick="selectMCAnswer('${questionId}', 'B')">
+                                <input type="radio" name="mc-answer-${questionId}" id="mc-b-${questionId}" value="B">
+                                <label for="mc-b-${questionId}" id="label-mc-b-${questionId}">Option B</label>
+                            </div>
+                            <div class="answer-option" onclick="selectMCAnswer('${questionId}', 'C')">
+                                <input type="radio" name="mc-answer-${questionId}" id="mc-c-${questionId}" value="C">
+                                <label for="mc-c-${questionId}" id="label-mc-c-${questionId}">Option C</label>
+                            </div>
+                            <div class="answer-option" onclick="selectMCAnswer('${questionId}', 'D')">
+                                <input type="radio" name="mc-answer-${questionId}" id="mc-d-${questionId}" value="D">
+                                <label for="mc-d-${questionId}" id="label-mc-d-${questionId}">Option D</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
             } else if (type === 'true-false-notgiven') {
                 optionsDiv.innerHTML = `
                     <div class="form-group">
@@ -549,13 +614,77 @@
                         </div>
                     </div>
                 `;
+                
+                answerFieldDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Correct Answer</label>
+                        <div class="answer-options" id="tfn-answer-${questionId}">
+                            <div class="answer-option" onclick="selectTFNAnswer('${questionId}', 'TRUE')">
+                                <input type="radio" name="tfn-answer-${questionId}" id="tfn-true-${questionId}" value="TRUE">
+                                <label for="tfn-true-${questionId}">TRUE</label>
+                            </div>
+                            <div class="answer-option" onclick="selectTFNAnswer('${questionId}', 'FALSE')">
+                                <input type="radio" name="tfn-answer-${questionId}" id="tfn-false-${questionId}" value="FALSE">
+                                <label for="tfn-false-${questionId}">FALSE</label>
+                            </div>
+                            <div class="answer-option" onclick="selectTFNAnswer('${questionId}', 'NOT GIVEN')">
+                                <input type="radio" name="tfn-answer-${questionId}" id="tfn-ng-${questionId}" value="NOT GIVEN">
+                                <label for="tfn-ng-${questionId}">NOT GIVEN</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
             } else {
                 optionsDiv.innerHTML = '';
+                answerFieldDiv.innerHTML = `
+                    <div class="form-group">
+                        <label>Correct Answer</label>
+                        <input type="text" id="answer-${questionId}" placeholder="Enter correct answer..." class="answer-text-input">
+                    </div>
+                `;
+            }
+        }
+        
+        function selectMCAnswer(questionId, option) {
+            const answerOptions = document.querySelectorAll(`#mc-answer-${questionId} .answer-option`);
+            answerOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            const selectedOption = document.querySelector(`#mc-${option.toLowerCase()}-${questionId}`).parentElement;
+            selectedOption.classList.add('selected');
+            document.querySelector(`#mc-${option.toLowerCase()}-${questionId}`).checked = true;
+            
+            // Highlight validation error o'chirish
+            selectedOption.classList.remove('validation-error');
+        }
+        
+        function selectTFNAnswer(questionId, option) {
+            const answerOptions = document.querySelectorAll(`#tfn-answer-${questionId} .answer-option`);
+            answerOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            const selectedOption = document.querySelector(`#tfn-${option.toLowerCase().replace(' ', '-')}-${questionId}`).parentElement;
+            selectedOption.classList.add('selected');
+            document.querySelector(`#tfn-${option.toLowerCase().replace(' ', '-')}-${questionId}`).checked = true;
+            
+            // Highlight validation error o'chirish
+            selectedOption.classList.remove('validation-error');
+        }
+        
+        function updateMCLabel(questionId, letter) {
+            const input = document.getElementById(`option-${letter.toLowerCase()}-${questionId}`);
+            const label = document.getElementById(`label-mc-${letter.toLowerCase()}-${questionId}`);
+            if (label && input) {
+                label.textContent = input.value || `Option ${letter}`;
             }
         }
         
         // ==================== TEST MANAGEMENT ====================
         function saveTest() {
+            // Clear previous validation errors
+            document.querySelectorAll('.validation-error').forEach(el => {
+                el.classList.remove('validation-error');
+            });
+            
             // Collect test data
             const testData = {
                 id: Date.now().toString(),
@@ -572,6 +701,7 @@
             // Validate passage
             if (!testData.passage.content.trim()) {
                 showMessage('Please add passage content', 'error');
+                document.getElementById('passage-content').classList.add('validation-error');
                 return;
             }
             
@@ -582,15 +712,69 @@
                 return;
             }
             
+            let hasError = false;
+            
+            // First pass: Validate all questions
             questionDivs.forEach((div, index) => {
                 const questionId = div.dataset.id;
                 const type = document.getElementById(`type-${questionId}`).value;
-                const text = document.getElementById(`text-${questionId}`).value;
-                const answer = document.getElementById(`answer-${questionId}`).value;
+                const textInput = document.getElementById(`text-${questionId}`);
+                const text = textInput ? textInput.value.trim() : '';
                 
-                if (!text || !answer) {
-                    showMessage(`Please complete Question ${index + 1}`, 'error');
-                    return;
+                // Check question text
+                if (!text) {
+                    showMessage(`Please enter text for Question ${index + 1}`, 'error');
+                    textInput.classList.add('validation-error');
+                    hasError = true;
+                }
+                
+                // Check answer based on type
+                let answer = '';
+                let answerElement = null;
+                
+                if (type === 'multiple-choice') {
+                    const selectedRadio = document.querySelector(`input[name="mc-answer-${questionId}"]:checked`);
+                    answer = selectedRadio ? selectedRadio.value : '';
+                    answerElement = selectedRadio ? selectedRadio.parentElement : null;
+                } else if (type === 'true-false-notgiven') {
+                    const selectedRadio = document.querySelector(`input[name="tfn-answer-${questionId}"]:checked`);
+                    answer = selectedRadio ? selectedRadio.value : '';
+                    answerElement = selectedRadio ? selectedRadio.parentElement : null;
+                } else {
+                    const answerInput = document.getElementById(`answer-${questionId}`);
+                    answer = answerInput ? answerInput.value.trim() : '';
+                    answerElement = answerInput;
+                }
+                
+                if (!answer) {
+                    showMessage(`Please select/enter answer for Question ${index + 1}`, 'error');
+                    if (answerElement) answerElement.classList.add('validation-error');
+                    hasError = true;
+                }
+            });
+            
+            if (hasError) {
+                return;
+            }
+            
+            // Second pass: Collect data
+            questionDivs.forEach((div, index) => {
+                const questionId = div.dataset.id;
+                const type = document.getElementById(`type-${questionId}`).value;
+                const textInput = document.getElementById(`text-${questionId}`);
+                const text = textInput.value;
+                
+                // Get answer
+                let answer = '';
+                if (type === 'multiple-choice') {
+                    const selectedRadio = document.querySelector(`input[name="mc-answer-${questionId}"]:checked`);
+                    answer = selectedRadio.value;
+                } else if (type === 'true-false-notgiven') {
+                    const selectedRadio = document.querySelector(`input[name="tfn-answer-${questionId}"]:checked`);
+                    answer = selectedRadio.value;
+                } else {
+                    const answerInput = document.getElementById(`answer-${questionId}`);
+                    answer = answerInput.value;
                 }
                 
                 const questionObj = {
@@ -604,9 +788,7 @@
                     const options = {};
                     ['a', 'b', 'c', 'd'].forEach(letter => {
                         const optionInput = document.getElementById(`option-${letter}-${questionId}`);
-                        if (optionInput && optionInput.value) {
-                            options[letter.toUpperCase()] = optionInput.value;
-                        }
+                        options[letter.toUpperCase()] = optionInput ? optionInput.value : `Option ${letter.toUpperCase()}`;
                     });
                     questionObj.options = options;
                 }
@@ -654,6 +836,7 @@
                         <div style="font-size: 48px; margin-bottom: 20px;">📚</div>
                         <h3 style="margin-bottom: 10px;">No tests yet</h3>
                         <p>Create your first test to get started!</p>
+                        <button class="btn" onclick="switchTab('create')" style="margin-top: 15px;">Create Test</button>
                     </div>
                 `;
                 return;
@@ -665,7 +848,7 @@
                     <div class="test-item">
                         <div class="test-info">
                             <h3>${test.title}</h3>
-                            <p>${test.questions.length} questions • ${test.duration} minutes</p>
+                            <p>${test.questions ? test.questions.length : 0} questions • ${test.duration} minutes</p>
                         </div>
                         <div class="test-actions">
                             <button class="edit-btn" onclick="editTest(${index})" title="Edit">✏️</button>
@@ -699,7 +882,6 @@
                 // Set question data
                 document.getElementById(`type-${questionId}`).value = question.type;
                 document.getElementById(`text-${questionId}`).value = question.text;
-                document.getElementById(`answer-${questionId}`).value = test.correctAnswers[question.number];
                 
                 // Trigger type change
                 document.getElementById(`type-${questionId}`).dispatchEvent(new Event('change'));
@@ -708,8 +890,37 @@
                 if (question.type === 'multiple-choice' && question.options) {
                     Object.entries(question.options).forEach(([letter, text]) => {
                         const input = document.getElementById(`option-${letter.toLowerCase()}-${questionId}`);
-                        if (input) input.value = text;
+                        if (input) {
+                            input.value = text;
+                            // Update label
+                            updateMCLabel(questionId.toString(), letter);
+                        }
                     });
+                    
+                    // Select correct answer
+                    const correctAnswer = test.correctAnswers[question.number];
+                    if (correctAnswer) {
+                        setTimeout(() => {
+                            selectMCAnswer(questionId.toString(), correctAnswer);
+                        }, 100);
+                    }
+                } 
+                // Set answer for true/false/not given
+                else if (question.type === 'true-false-notgiven') {
+                    const correctAnswer = test.correctAnswers[question.number];
+                    if (correctAnswer) {
+                        setTimeout(() => {
+                            selectTFNAnswer(questionId.toString(), correctAnswer);
+                        }, 100);
+                    }
+                }
+                // Set answer for other types
+                else {
+                    const correctAnswer = test.correctAnswers[question.number];
+                    const answerInput = document.getElementById(`answer-${questionId}`);
+                    if (correctAnswer && answerInput) {
+                        answerInput.value = correctAnswer;
+                    }
                 }
             });
             
@@ -754,15 +965,19 @@
             reader.onload = function(e) {
                 try {
                     const importedTests = JSON.parse(e.target.result);
-                    allTests = importedTests;
-                    localStorage.setItem('ielts_tests', JSON.stringify(allTests));
-                    loadTestsList();
-                    showMessage(`✅ Imported ${allTests.length} test(s)`, 'success');
+                    
+                    // Import qilishdan oldin tasdiqlash
+                    if (confirm(`Import ${importedTests.length} test(s)? This will replace existing tests.`)) {
+                        allTests = importedTests;
+                        localStorage.setItem('ielts_tests', JSON.stringify(allTests));
+                        loadTestsList();
+                        showMessage(`✅ Imported ${allTests.length} test(s)`, 'success');
+                    }
                     
                     // Clear file input
                     event.target.value = '';
                 } catch (error) {
-                    showMessage('Invalid file format', 'error');
+                    showMessage('Invalid file format. Please select a valid JSON file.', 'error');
                 }
             };
             reader.readAsText(file);
