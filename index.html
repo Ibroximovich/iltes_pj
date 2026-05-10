@@ -1,1120 +1,1514 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IELTS Reading Practice Test</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <style>
-      html {
-        scroll-behavior: smooth;
-      }
-      .passage-scrollbar::-webkit-scrollbar {
-        width: 8px;
-      }
-      .passage-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-      }
-      .passage-scrollbar::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-      }
-      .passage-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #555;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-      @keyframes slideUp {
-        from {
-          transform: translateY(50px);
-          opacity: 0;
-        }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-      header {
-        height: 80px;
-      }
-      main {
-        margin-top: 100px;
-        margin-bottom: 120px;
-      }
-      #question-nav {
-        max-height: 100px;
-        overflow-y: auto;
-      }
-      #result-modal {
-        z-index: 100;
-      }
+<html lang="uz" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- ═════════ EDIT: Sahifa sarlavhasi ═════════ -->
+  <title>Ziyofat — Zamonaviy o‘zbek va xalqaro taomlar</title>
+  <meta name="description" content="Ziyofat: premium fusion restoran — signature taomlar, elegant interyer va mehmondorchilik." />
 
-      /* Test cards styling */
-      .test-card {
-        transition: all 0.3s ease;
-        cursor: pointer;
-      }
-      .test-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      }
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            wine: {
+              DEFAULT: "#9F1239",
+              dark: "#881337",
+              light: "#BE185D",
+            },
+            gold: {
+              DEFAULT: "#D4AF37",
+              soft: "#E8D48B",
+              deep: "#B8941E",
+            },
+            charcoal: "#111827",
+            cream: {
+              DEFAULT: "#FDF8F3",
+              muted: "#F5EDE4",
+            },
+          },
+          fontFamily: {
+            display: ["var(--font-display)", "ui-serif", "Georgia", "serif"],
+            sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+          },
+          boxShadow: {
+            luxe: "0 25px 60px -15px rgba(17, 24, 39, 0.35)",
+            glow: "0 0 40px rgba(212, 175, 55, 0.22)",
+            card: "0 12px 40px rgba(17, 24, 39, 0.12)",
+          },
+          transitionDuration: {
+            400: "400ms",
+          },
+        },
+      },
+    };
+  </script>
 
-      /* Password modal */
-      .password-modal {
-        animation: fadeIn 0.3s ease;
+  <!-- Chiroyli shrift juftligi: Playfair Display (sarlavhalar) + Outfit (matn/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --font-display: "Playfair Display", "Georgia", serif;
+      --font-sans: "Outfit", "system-ui", sans-serif;
+    }
+    .font-display {
+      font-feature-settings: "liga" 1, "kern" 1;
+    }
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
-      .password-modal-content {
-        animation: slideUp 0.5s ease;
-      }
+    }
+    /* Custom cursor — faqat katta ekran */
+    .use-custom-cursor body.custom-cursor-active {
+      cursor: none;
+    }
+    .cursor-dot {
+      pointer-events: none;
+      position: fixed;
+      z-index: 99999;
+      width: 10px;
+      height: 10px;
+      margin: -5px 0 0 -5px;
+      border-radius: 9999px;
+      background: radial-gradient(circle, rgba(212,175,55,0.95), rgba(159,18,57,0.85));
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.55);
+      transition: transform 0.15s ease, opacity 0.2s ease, width 0.2s, height 0.2s, margin 0.2s;
+      mix-blend-mode: normal;
+    }
+    .cursor-dot.is-hover {
+      width: 44px;
+      height: 44px;
+      margin: -22px 0 0 -22px;
+      opacity: 0.92;
+      background: radial-gradient(circle, rgba(212,175,55,0.35), rgba(159,18,57,0.25));
+      box-shadow: 0 0 35px rgba(212, 175, 55, 0.45);
+    }
+    .cursor-fork {
+      pointer-events: none;
+      position: fixed;
+      z-index: 99998;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.15s ease;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+    }
+    .cursor-fork.visible {
+      opacity: 1;
+    }
+    /* Hero parallax layer */
+    .hero-parallax {
+      will-change: transform;
+    }
+    /* Scroll reveal initial */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+  </style>
 
-      /* Correct/Incorrect answer highlighting */
-      .correct-answer {
-        background-color: #d1fae5 !important;
-        border-color: #10b981 !important;
-        color: #065f46 !important;
-      }
-      
-      .incorrect-answer {
-        background-color: #fee2e2 !important;
-        border-color: #ef4444 !important;
-        color: #991b1b !important;
-      }
-      
-      .correct-radio {
-        background-color: #d1fae5 !important;
-        border-color: #10b981 !important;
-      }
-      
-      .incorrect-radio {
-        background-color: #fee2e2 !important;
-        border-color: #ef4444 !important;
-      }
-      
-      .correct-text {
-        border: 2px solid #10b981 !important;
-        background-color: #d1fae5 !important;
-      }
-      
-      .incorrect-text {
-        border: 2px solid #ef4444 !important;
-        background-color: #fee2e2 !important;
-      }
-      
-      .show-answer-btn {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        border: none !important;
-      }
-      
-      .show-answer-btn:hover {
-        background-color: #2563eb !important;
-      }
-    </style>
-  </head>
-  <body class="bg-gray-50">
-    <!-- Admin Password Modal -->
-    <div
-      id="admin-password-modal"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"
-    >
-      <div
-        class="bg-white rounded-xl shadow-2xl max-w-md w-full password-modal-content"
-      >
-        <div class="p-8">
-          <div class="text-center mb-6">
-            <div class="text-4xl text-blue-600 mb-4">
-              <i class="fas fa-lock"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-800">Admin Access</h2>
-            <p class="text-gray-600 mt-2">
-              Enter admin password to access admin panel
-            </p>
-          </div>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
 
-          <div class="space-y-6">
-            <div>
-              <label class="block text-gray-700 font-bold mb-2">Password</label>
-              <input
-                type="password"
-                id="admin-login-password"
-                class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter admin password"
-              />
-              <p class="text-gray-500 text-sm mt-2">
-                <i class="fas fa-info-circle mr-1"></i>
-                Default password: admin123
-              </p>
-            </div>
+<body class="font-sans bg-cream text-charcoal antialiased transition-colors duration-400 dark:bg-charcoal dark:text-cream">
+  <!-- ═════════ EDIT: Restoran nomi (logotip matni) — [Restaurant Name] ga almashtirish oson ═════════ -->
 
-            <div
-              id="password-error"
-              class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
-            >
-              <i class="fas fa-exclamation-triangle mr-2"></i>
-              Incorrect password!
-            </div>
+  <!-- Custom cursor elements -->
+  <div id="cursorDot" class="cursor-dot hidden" aria-hidden="true"></div>
+  <div id="cursorFork" class="cursor-fork hidden" aria-hidden="true"><i class="fa-solid fa-utensils text-gold"></i></div>
 
-            <div class="flex space-x-3">
-              <button
-                onclick="closeAdminModal()"
-                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-lg transition duration-300"
-              >
-                Cancel
-              </button>
-              <button
-                onclick="checkAdminPassword()"
-                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300"
-              >
-                <i class="fas fa-sign-in-alt mr-2"></i>Login
-              </button>
-            </div>
-          </div>
+  <!-- Floating Telegram -->
+  <!-- EDIT: Telegram — @username yoki t.me/ havola (masalan: https://t.me/ziyofat) -->
+  <a
+    id="telegramFab"
+    href="https://t.me/ziyofat"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="fixed bottom-6 right-6 z-[90] flex h-14 w-14 items-center justify-center rounded-full bg-[#229ED9] text-white shadow-luxe transition hover:scale-110 hover:shadow-glow hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 dark:focus:ring-offset-charcoal"
+    aria-label="Telegram orqali yozish"
+  >
+    <i class="fa-brands fa-telegram text-2xl"></i>
+  </a>
+
+  <!-- Back to top -->
+  <button
+    id="backTop"
+    type="button"
+    class="fixed bottom-6 left-6 z-[90] hidden h-12 w-12 items-center justify-center rounded-full border border-wine/20 bg-white/90 text-wine shadow-card backdrop-blur-md transition hover:bg-wine hover:text-white dark:border-gold/30 dark:bg-charcoal/90 dark:text-gold dark:hover:bg-gold dark:hover:text-charcoal"
+    aria-label="Yuqoriga"
+  >
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- NAVBAR -->
+  <header class="fixed inset-x-0 top-0 z-[80] transition-all duration-400" id="siteHeader">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mt-4 flex items-center justify-between rounded-2xl border border-charcoal/10 bg-white/80 px-4 py-3 shadow-card backdrop-blur-xl dark:border-white/10 dark:bg-charcoal/75 dark:shadow-none lg:px-6">
+        <a href="#hero" class="group flex items-center gap-2">
+          <!-- EDIT: Logo — SVG yoki matn -->
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-wine to-wine-dark text-xl text-white shadow-glow ring-2 ring-gold/40">Z</span>
+          <span class="font-display text-2xl font-semibold tracking-wide text-charcoal dark:text-cream">Ziyofat</span>
+        </a>
+
+        <!-- Desktop nav -->
+        <nav class="hidden items-center gap-8 text-sm font-medium lg:flex" aria-label="Asosiy menyu">
+          <a href="#about" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Biz haqimizda</a>
+          <a href="#menu" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Menyu</a>
+          <a href="#gallery" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Galereya</a>
+          <a href="#testimonials" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Sharhlar</a>
+          <a href="#reserve" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Bron</a>
+          <a href="#contact" class="nav-link text-charcoal/80 transition hover:text-wine dark:text-cream/80 dark:hover:text-gold">Aloqa</a>
+        </nav>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Dark / Light toggle -->
+          <button
+            id="themeToggle"
+            type="button"
+            class="nav-link flex h-10 w-10 items-center justify-center rounded-full border border-charcoal/10 bg-cream/50 text-lg text-charcoal transition hover:border-gold/50 hover:text-wine dark:border-white/10 dark:bg-white/5 dark:text-gold"
+            aria-label="Tema almashtirish"
+          >
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:inline"></i>
+          </button>
+
+          <a
+            href="#reserve"
+            class="nav-link hidden rounded-full bg-gradient-to-r from-wine to-wine-dark px-5 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:brightness-110 sm:inline-flex"
+          >
+            Stol bron qilish
+          </a>
+
+          <!-- Hamburger -->
+          <button
+            id="menuBtn"
+            type="button"
+            class="nav-link flex h-10 w-10 items-center justify-center rounded-full border border-charcoal/10 lg:hidden dark:border-white/10"
+            aria-expanded="false"
+            aria-controls="mobileNav"
+            aria-label="Menyuni ochish"
+          >
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- Fixed Header -->
-    <header
-      id="main-header"
-      class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4 hidden"
-    >
-      <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-800">
-          IELTS Reading Practice Test
+      <!-- Mobile menu drawer -->
+      <div id="mobileNav" class="pointer-events-none invisible mt-2 max-h-0 overflow-hidden rounded-2xl border border-charcoal/10 bg-white/95 opacity-0 shadow-luxe backdrop-blur-xl transition-all duration-400 dark:border-white/10 dark:bg-charcoal/95 lg:hidden">
+        <nav class="flex flex-col gap-1 p-4" aria-label="Mobil menyu">
+          <a href="#about" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Biz haqimizda</a>
+          <a href="#menu" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Menyu</a>
+          <a href="#gallery" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Galereya</a>
+          <a href="#testimonials" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Sharhlar</a>
+          <a href="#reserve" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Bron</a>
+          <a href="#contact" class="mobile-link rounded-xl px-4 py-3 font-medium text-charcoal hover:bg-wine/10 dark:text-cream dark:hover:bg-gold/10">Aloqa</a>
+          <a href="#reserve" class="mt-2 rounded-xl bg-wine py-3 text-center font-semibold text-white dark:bg-gold dark:text-charcoal">Stol bron qilish</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="relative flex min-h-screen items-center justify-center overflow-hidden pt-28">
+      <!-- Parallax background -->
+      <!-- EDIT: Hero fon rasmi -->
+      <div class="absolute inset-0 z-0 hero-parallax" id="heroBg" style="background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2400&q=85'); background-size: cover; background-position: center;"></div>
+      <div class="absolute inset-0 z-[1] bg-gradient-to-b from-charcoal/85 via-charcoal/65 to-charcoal/90 dark:from-charcoal/95 dark:via-charcoal/80 dark:to-charcoal"></div>
+      <div class="absolute inset-0 z-[1] bg-gradient-to-tr from-wine/40 via-transparent to-gold/20"></div>
+
+      <div class="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6">
+        <p class="reveal mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-gold-soft">Modern Uzbek · International fusion</p>
+        <!-- EDIT: Hero sarlavha -->
+        <h1 class="reveal reveal-delay-1 font-display text-5xl font-semibold leading-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
+          Ziyofat
         </h1>
-        <div class="flex items-center space-x-6">
-          <div class="flex items-center space-x-4">
-            <div class="text-lg font-semibold">Time:</div>
-            <div
-              id="timer"
-              class="text-2xl font-bold text-red-600 bg-gray-100 px-4 py-2 rounded-lg"
-            >
-              60:00
-            </div>
-            <button
-              id="pause-timer"
-              class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-            >
-              <i class="fas fa-pause"></i> Pause
-            </button>
-          </div>
-          <button
-            id="submit-test"
-            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+        <!-- EDIT: Hero podzagolovok -->
+        <p class="reveal reveal-delay-2 mx-auto mt-6 max-w-2xl text-lg text-white/85 md:text-xl">
+          Issiq, tabiiy va buyuk anʼanalar — bugungi premium servis va xalqaro texnika bilan uygʻunlashgan.
+        </p>
+        <div class="reveal reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <a
+            href="#menu"
+            class="interactive inline-flex min-h-[52px] min-w-[220px] items-center justify-center rounded-full bg-gold px-8 py-3.5 text-base font-semibold text-charcoal shadow-glow transition hover:scale-[1.02] hover:bg-gold-soft active:scale-[0.98]"
           >
-            <i class="fas fa-paper-plane"></i> Submit Test
-          </button>
-          <button
-            id="back-to-tests"
-            class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+            Ko‘rish menyuni
+          </a>
+          <a
+            href="#reserve"
+            class="interactive inline-flex min-h-[52px] min-w-[220px] items-center justify-center rounded-full border-2 border-white/40 bg-white/10 px-8 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition hover:border-gold hover:bg-white/15 active:scale-[0.98]"
           >
-            ← Back
-          </button>
+            Stol bron qilish
+          </a>
         </div>
       </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto p-4">
-      <!-- Test Selection Page -->
-      <div id="test-selection-page">
-        <!-- Header -->
-        <div class="text-center mb-12">
-          <h1 class="text-4xl font-bold text-blue-800 mb-4">
-            📚 IELTS Reading Practice
-          </h1>
-          <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-            Practice with real IELTS reading tests. Improve your skills and
-            track your progress.
+      <a href="#about" class="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/70 transition hover:text-gold" aria-label="Pastga scroll">
+        <i class="fa-solid fa-chevron-down text-2xl"></i>
+      </a>
+    </section>
+
+    <!-- STATS STRIP (counter) -->
+    <section class="border-y border-charcoal/10 bg-white py-12 dark:border-white/10 dark:bg-charcoal/50">
+      <div class="mx-auto grid max-w-7xl grid-cols-2 gap-8 px-4 md:grid-cols-4 md:px-6">
+        <div class="reveal text-center">
+          <p class="font-display text-4xl font-semibold text-wine dark:text-gold"><span class="counter" data-target="18">0</span><span class="text-gold">+</span></p>
+          <p class="mt-1 text-sm text-charcoal/70 dark:text-cream/65">Yillik tajriba</p>
+        </div>
+        <div class="reveal reveal-delay-1 text-center">
+          <p class="font-display text-4xl font-semibold text-wine dark:text-gold"><span class="counter" data-target="120">0</span><span class="text-gold">+</span></p>
+          <p class="mt-1 text-sm text-charcoal/70 dark:text-cream/65">Taomlar menyusi</p>
+        </div>
+        <div class="reveal reveal-delay-2 text-center">
+          <p class="font-display text-4xl font-semibold text-wine dark:text-gold"><span class="counter" data-target="48">0</span></p>
+          <p class="mt-1 text-sm text-charcoal/70 dark:text-cream/65">VIP mehmonlar</p>
+        </div>
+        <div class="reveal reveal-delay-3 text-center">
+          <p class="font-display text-4xl font-semibold text-wine dark:text-gold"><span class="counter" data-target="4.9">0</span><span class="text-gold">★</span></p>
+          <p class="mt-1 text-sm text-charcoal/70 dark:text-cream/65">O‘rtacha baho</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="relative py-20 md:py-28">
+      <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 md:grid-cols-2 md:px-6 lg:gap-16">
+        <div class="reveal relative overflow-hidden rounded-3xl shadow-luxe">
+          <!-- EDIT: About rasm -->
+          <img
+            src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85"
+            alt="Ziyofat restorani zamonaviy interyeri va iliq muhit"
+            class="h-full w-full object-cover transition duration-700 hover:scale-105"
+            width="1200"
+            height="900"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-tr from-wine/30 to-transparent"></div>
+        </div>
+        <div>
+          <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Biz haqimizda</p>
+          <!-- EDIT: About matn -->
+          <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+            Mehmondorchilik — bizning DNA’miz
+          </h2>
+          <p class="reveal reveal-delay-2 mt-6 text-lg leading-relaxed text-charcoal/75 dark:text-cream/75">
+            Ziyofat — Oʻzbekiston taʼmi bilan Yevropa va Osiyo texnikasini birlashtirgan fusion maskan. Biz mahalliy fermer mahsulotlaridan foydalanamiz, oshena va sommelier jamoamiz esa har bir oʻyin-kulgi uchun ideal juftlikni tanlaydi.
           </p>
-          <div class="mt-8">
-            <button
-              onclick="openAdminPanel()"
-              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 inline-flex items-center"
-            >
-              <i class="fas fa-cog mr-2"></i>Admin Panel
-            </button>
-          </div>
+          <p class="reveal reveal-delay-3 mt-4 text-lg leading-relaxed text-charcoal/75 dark:text-cream/75">
+            Kechki chiroqlar, yumshoq jazz va shaxsiy xizmat — bu yerda shunchaki ovqatlanmasdan, xotira yaratiladi.
+          </p>
+          <a href="#reserve" class="interactive reveal mt-8 inline-flex items-center gap-2 font-semibold text-wine transition hover:gap-3 dark:text-gold">
+            Tajribani boshlash <i class="fa-solid fa-arrow-right text-sm"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU HIGHLIGHTS -->
+    <section id="menu" class="border-t border-charcoal/10 bg-cream-muted py-20 dark:border-white/10 dark:bg-charcoal/80 md:py-28">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Menyu</p>
+          <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+            Signature taomlar
+          </h2>
+          <p class="reveal reveal-delay-2 mt-4 text-charcoal/70 dark:text-cream/70">
+            Har bir turkumda — shefning tanlangan receptlari.
+          </p>
         </div>
 
-        <!-- Test Cards -->
-        <div
-          id="test-cards-container"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          <!-- Tests will be loaded here -->
-        </div>
-
-        <!-- Loading State -->
-        <div id="loading-state" class="text-center py-12">
-          <div
-            class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"
-          ></div>
-          <p class="text-gray-600">Loading tests...</p>
-        </div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="hidden text-center py-12">
-          <div class="text-6xl text-gray-400 mb-4">📚</div>
-          <h3 class="text-xl font-bold text-gray-600 mb-2">
-            No Tests Available
+        <!-- Cold Starters -->
+        <div class="mt-14">
+          <h3 class="reveal mb-6 flex items-center gap-3 font-display text-2xl font-semibold text-charcoal dark:text-cream">
+            <i class="fa-solid fa-leaf text-gold"></i> Sovuq starterlar
           </h3>
-          <p class="text-gray-500 mb-6">Check back later or contact admin.</p>
-          <button
-            onclick="openAdminPanel()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-          >
-            <i class="fas fa-cog mr-2"></i>Admin Panel
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- EDIT: Menyu kartasi — nusxa olib yangi taom qo‘shing -->
+            <article class="menu-card group reveal relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90 dark:shadow-none">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=85" alt="Yashil salat va yogurt sous" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">85 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Atlas salati</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Champion pomidor, bodring, qatiq sousi va zafarān notalari.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-1 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=85" alt="Smoked salmon tartine" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">92 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Trio brusketta</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Gril pomidor, zaytun va limon zest bilan.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-2 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=85" alt="Yengil starterlar tabaqasi" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">78 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Garden crudo</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Sezon sabzavotlari, sitrus va zaytun moyi.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Hot Meals -->
+        <div class="mt-16">
+          <h3 class="reveal mb-6 flex items-center gap-3 font-display text-2xl font-semibold text-charcoal dark:text-cream">
+            <i class="fa-solid fa-fire text-gold"></i> Issiq taomlar
+          </h3>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="menu-card group reveal relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1633945274405-6a3f59690d63?auto=format&fit=crop&w=900&q=85" alt="O‘zbek osh va go‘sht" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">145 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Premium osh Ziyofat</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Mol go‘shti, zafarān, novvot — klassik va zamonaviy uyg‘unlik.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-1 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&q=85" alt="Gril kabob va garnir" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">165 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Silk Road kabob</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Mol va qoʻzi file, chim chim chim yog‘ida.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-2 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=85" alt="Gril baliq va sabzavot" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">138 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Charcoal baliq</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Dengiz bassi, limon-myotta sous.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Desserts -->
+        <div class="mt-16">
+          <h3 class="reveal mb-6 flex items-center gap-3 font-display text-2xl font-semibold text-charcoal dark:text-cream">
+            <i class="fa-solid fa-cake-candles text-gold"></i> Desertlar
+          </h3>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="menu-card group reveal relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=85" alt="Shokolad desert" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">62 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Gold soufflé</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Belgiya shokoladi, vanil va olma chiposti.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-1 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=85" alt="Paxlava va muzqaymoq" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">58 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Navruz paxlavasi</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Yong‘oq, asal va zafarān siropi.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-2 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=85" alt="Muzqaymoq va meva" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">54 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Sorbet trio</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Anor, limon, bazilik — yangilovchi finish.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Drinks -->
+        <div class="mt-16">
+          <h3 class="reveal mb-6 flex items-center gap-3 font-display text-2xl font-semibold text-charcoal dark:text-cream">
+            <i class="fa-solid fa-martini-glass-citrus text-gold"></i> Ichimliklar
+          </h3>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="menu-card group reveal relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1544145945-f90425340d7d?auto=format&fit=crop&w=900&q=85" alt="Kokteyllar" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">45 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Samarkand sour</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Limon, zafarān, novvot siropi — alkogolsiz.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-1 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=85" alt="Issiq ichimliklar" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">38 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Spice latte</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Zanjabil, dolchin va espresso balansi.</p>
+              </div>
+            </article>
+            <article class="menu-card group reveal reveal-delay-2 relative overflow-hidden rounded-2xl bg-white shadow-card dark:bg-charcoal/90">
+              <div class="relative aspect-[4/3] overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=900&q=85" alt="Sharbat va choy" class="h-full w-full object-cover transition duration-700 group-hover:scale-110" loading="lazy" />
+                <div class="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent opacity-80 transition group-hover:opacity-90"></div>
+                <span class="absolute bottom-3 left-3 rounded-full bg-gold px-3 py-1 text-xs font-bold text-charcoal">32 000 so‘m</span>
+              </div>
+              <div class="p-5">
+                <h4 class="font-display text-xl font-semibold text-charcoal dark:text-cream">Silk tea flight</h4>
+                <p class="mt-2 text-sm text-charcoal/65 dark:text-cream/65">Yashil, oq va zafarān choyi — mini to‘plam.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHEF SPECIAL -->
+    <section id="special" class="py-20 md:py-28">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="reveal overflow-hidden rounded-3xl bg-gradient-to-br from-wine via-wine-dark to-charcoal text-white shadow-luxe">
+          <div class="grid md:grid-cols-2">
+            <div class="relative min-h-[320px]">
+              <!-- EDIT: Shef taomi rasmi -->
+              <img
+                src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=85"
+                alt="Shefning maxsus taomi — gril go‘sht va garnir"
+                class="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-gradient-to-r from-charcoal/60 to-transparent md:bg-gradient-to-l"></div>
+            </div>
+            <div class="flex flex-col justify-center p-8 md:p-12 lg:p-14">
+              <p class="text-sm font-semibold uppercase tracking-widest text-gold-soft">Shef tavsiyasi</p>
+              <!-- EDIT: Maxsus taklif matni -->
+              <h2 class="mt-3 font-display text-3xl font-semibold md:text-4xl">Haftaning yulduzi — “Royal fusion”</h2>
+              <p class="mt-4 text-white/85">
+                Mol antrekot, truffle kartoshka va olxo‘ri sous — bizning ochiq oshxonada tayyorlanadi. Cheklangan son — har kuni 12 ta.
+              </p>
+              <div class="mt-8 flex flex-wrap items-center gap-4">
+                <span class="rounded-full bg-gold px-5 py-2 text-sm font-bold text-charcoal">298 000 so‘m</span>
+                <a href="#reserve" class="interactive inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-sm font-semibold transition hover:bg-white/10">
+                  Joy band qilish <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY + LIGHTBOX -->
+    <section id="gallery" class="border-t border-charcoal/10 bg-cream py-20 dark:border-white/10 dark:bg-charcoal/90 md:py-28">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Galereya</p>
+          <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+            Taom va makon — vizual qoʻshiq
+          </h2>
+        </div>
+        <div class="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
+          <!-- EDIT: Galereya — gallery-item klassli yangi <figure> qo‘shing -->
+          <figure class="gallery-item reveal mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=85" alt="Restoran interyeri — yumshoq chiroqlar" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+          <figure class="gallery-item reveal reveal-delay-1 mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=85" alt="Professional taom surati — garnish" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+          <figure class="gallery-item reveal reveal-delay-2 mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1598515214210-01dd40726f20?auto=format&fit=crop&w=900&q=85" alt="Sharx va somon taomlari" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+          <figure class="gallery-item reveal mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=85" alt="Mazali stol — restoran kechki ovqat" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+          <figure class="gallery-item reveal reveal-delay-1 mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=900&q=85" alt="Bar va kokteyllar" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+          <figure class="gallery-item reveal reveal-delay-2 mb-4 break-inside-avoid overflow-hidden rounded-2xl shadow-card cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1560624053-701c662ab08f?auto=format&fit=crop&w=900&q=85" alt="Chiroyli desert tart" class="w-full object-cover transition duration-500 hover:scale-105" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lightbox modal -->
+    <div id="lightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-charcoal/95 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Rasm kattalashtirilgan">
+      <button type="button" id="lightboxClose" class="absolute right-6 top-6 text-3xl text-white/80 transition hover:text-gold" aria-label="Yopish">&times;</button>
+      <img id="lightboxImg" src="" alt="" class="max-h-[90vh] max-w-full rounded-lg object-contain shadow-luxe" />
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="border-t border-charcoal/10 bg-white py-20 dark:border-white/10 dark:bg-charcoal md:py-28">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Mehmonlar fikri</p>
+          <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+            Biz bilan ulashilgan tajribalar
+          </h2>
+        </div>
+
+        <div class="relative mx-auto mt-14 max-w-4xl">
+          <div class="overflow-hidden rounded-3xl border border-charcoal/10 bg-cream-muted p-8 shadow-card dark:border-white/10 dark:bg-charcoal/80 md:p-12">
+            <div id="testimonialTrack" class="flex transition-transform duration-500 ease-out">
+              <!-- EDIT: Sharh kartalari -->
+              <article class="testimonial-slide min-w-full shrink-0 px-2 text-center md:px-8">
+                <div class="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-full ring-4 ring-gold/40">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=85" alt="Mehmon — Leyla" class="h-full w-full object-cover" width="200" height="200" loading="lazy" />
+                </div>
+                <div class="mx-auto mb-4 flex justify-center gap-1 text-gold">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <blockquote class="font-display text-xl italic leading-relaxed text-charcoal md:text-2xl dark:text-cream">
+                  “Ziyofat — vizual va taʼmdagi WOW. Osh va desertlar boshqa dunyo.”
+                </blockquote>
+                <p class="mt-6 font-semibold text-wine dark:text-gold">Leyla Karimova</p>
+                <p class="text-sm text-charcoal/60 dark:text-cream/55">Dizayner</p>
+              </article>
+              <article class="testimonial-slide min-w-full shrink-0 px-2 text-center md:px-8">
+                <div class="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-full ring-4 ring-gold/40">
+                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=85" alt="Mehmon — Jasur" class="h-full w-full object-cover" width="200" height="200" loading="lazy" />
+                </div>
+                <div class="mx-auto mb-4 flex justify-center gap-1 text-gold">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+                <blockquote class="font-display text-xl italic leading-relaxed text-charcoal md:text-2xl dark:text-cream">
+                  “Biznes uchrashuvdan keyin kechki ovqat — servis va ovqat birdek ideal.”
+                </blockquote>
+                <p class="mt-6 font-semibold text-wine dark:text-gold">Jasur Tursunov</p>
+                <p class="text-sm text-charcoal/60 dark:text-cream/55">Tadbirkor</p>
+              </article>
+              <article class="testimonial-slide min-w-full shrink-0 px-2 text-center md:px-8">
+                <div class="mx-auto mb-6 h-16 w-16 overflow-hidden rounded-full ring-4 ring-gold/40">
+                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=85" alt="Mehmon — Madina" class="h-full w-full object-cover" width="200" height="200" loading="lazy" />
+                </div>
+                <div class="mx-auto mb-4 flex justify-center gap-1 text-gold">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <blockquote class="font-display text-xl italic leading-relaxed text-charcoal md:text-2xl dark:text-cream">
+                  “Interyer va ovqat surati Instagram uchun ideal — lekin taʼm yanada yaxshi.”
+                </blockquote>
+                <p class="mt-6 font-semibold text-wine dark:text-gold">Madina Yusupova</p>
+                <p class="text-sm text-charcoal/60 dark:text-cream/55">Bloger</p>
+              </article>
+            </div>
+          </div>
+          <button type="button" id="prevTest" class="absolute left-0 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-charcoal/15 bg-white text-charcoal shadow-md transition hover:border-gold md:-left-5 dark:border-white/15 dark:bg-charcoal dark:text-cream" aria-label="Oldingi">
+            <i class="fa-solid fa-chevron-left"></i>
           </button>
+          <button type="button" id="nextTest" class="absolute right-0 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-charcoal/15 bg-white text-charcoal shadow-md transition hover:border-gold md:-right-5 dark:border-white/15 dark:bg-charcoal dark:text-cream" aria-label="Keyingi">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <div id="testDots" class="mt-6 flex justify-center gap-2"></div>
         </div>
       </div>
+    </section>
 
-      <!-- Test Interface Page -->
-      <div id="test-interface-page" class="hidden space-y-8 flex">
-        <!-- Passage Side -->
-        <div class="w-[50%] h-[100vh] overflow-y-auto passage-scrollbar">
-          <h3 id="passage-title-display" class="text-2xl font-bold mb-6"></h3>
-          <div id="passage-content-display" class="prose max-w-none">
-            <!-- Passage will be loaded here -->
-          </div>
+    <!-- RESERVATION -->
+    <section id="reserve" class="border-t border-charcoal/10 bg-cream-muted py-20 dark:border-white/10 dark:bg-charcoal/80 md:py-28">
+      <div class="mx-auto max-w-3xl px-4 md:px-6">
+        <div class="text-center">
+          <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Bron</p>
+          <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+            Stol band qilish
+          </h2>
+          <p class="reveal reveal-delay-2 mt-4 text-charcoal/70 dark:text-cream/65">
+            Formani to‘ldiring — administratorlarimiz 15 daqiqa ichida aloqaga chiqadi.
+          </p>
         </div>
+        <!-- novalidate: telefon/sana tekshiruvi JS da — bir xil xabarlar chiqishi uchun -->
+        <form id="reserveForm" class="reveal mt-12 space-y-5 rounded-3xl border border-charcoal/10 bg-white p-6 shadow-card dark:border-white/10 dark:bg-charcoal/90 md:p-10" novalidate>
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="r-name" class="mb-2 block text-sm font-medium text-charcoal dark:text-cream">Ism</label>
+              <input id="r-name" name="name" required type="text" autocomplete="name" minlength="2" maxlength="80" class="w-full rounded-xl border border-charcoal/15 bg-cream/50 px-4 py-3.5 text-charcoal outline-none ring-wine/0 transition focus:border-wine focus:ring-2 focus:ring-wine/25 dark:border-white/15 dark:bg-charcoal dark:text-cream dark:focus:border-gold dark:focus:ring-gold/25" placeholder="Ismingiz" />
+            </div>
+            <div>
+              <label for="r-phone" class="mb-2 block text-sm font-medium text-charcoal dark:text-cream">Telefon</label>
+              <input
+                id="r-phone"
+                name="phone"
+                required
+                type="tel"
+                autocomplete="tel"
+                inputmode="tel"
+                maxlength="19"
+                title="+998 va 9 ta mobil raqam"
+                placeholder="+998 90 123 45 67"
+                pattern="^(?:\+998|998)[\s]?[0-9]{2}[\s]?[0-9]{3}[\s]?[0-9]{2}[\s]?[0-9]{2}$"
+                aria-describedby="r-phone-hint"
+                class="w-full rounded-xl border border-charcoal/15 bg-cream/50 px-4 py-3.5 text-charcoal outline-none transition focus:border-wine focus:ring-2 focus:ring-wine/25 dark:border-white/15 dark:bg-charcoal dark:text-cream dark:focus:border-gold dark:focus:ring-gold/25"
+              />
+              <p id="r-phone-hint" class="mt-1.5 text-xs text-charcoal/50 dark:text-cream/45">
+                Namuna: <strong>+998 90 123 45 67</strong>. «So‘rov yuborish»da raqam JavaScript orqali tekshiriladi (<code class="rounded bg-charcoal/10 px-1 text-[11px] dark:bg-white/10">+998</code> + 9 raqam).
+              </p>
+            </div>
+          </div>
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="r-date" class="mb-2 block text-sm font-medium text-charcoal dark:text-cream">Sana</label>
+              <input id="r-date" name="date" required type="date" class="w-full rounded-xl border border-charcoal/15 bg-cream/50 px-4 py-3.5 text-charcoal outline-none transition focus:border-wine focus:ring-2 focus:ring-wine/25 dark:border-white/15 dark:bg-charcoal dark:text-cream dark:focus:border-gold dark:focus:ring-gold/25" />
+            </div>
+            <div>
+              <label for="r-guests" class="mb-2 block text-sm font-medium text-charcoal dark:text-cream">Mehmonlar soni</label>
+              <input id="r-guests" name="guests" required type="number" min="1" max="20" class="w-full rounded-xl border border-charcoal/15 bg-cream/50 px-4 py-3.5 text-charcoal outline-none transition focus:border-wine focus:ring-2 focus:ring-wine/25 dark:border-white/15 dark:bg-charcoal dark:text-cream dark:focus:border-gold dark:focus:ring-gold/25" placeholder="2" />
+            </div>
+          </div>
+          <div>
+            <label for="r-msg" class="mb-2 block text-sm font-medium text-charcoal dark:text-cream">Izoh (ixtiyoriy)</label>
+            <textarea id="r-msg" name="message" rows="3" class="w-full rounded-xl border border-charcoal/15 bg-cream/50 px-4 py-3.5 text-charcoal outline-none transition focus:border-wine focus:ring-2 focus:ring-wine/25 dark:border-white/15 dark:bg-charcoal dark:text-cream dark:focus:border-gold dark:focus:ring-gold/25" placeholder="Maxsus so‘rovlar, allergiya…"></textarea>
+          </div>
+          <!-- Holatlar: loading / muvaffaqiyat / xato (Telegram uslubi + aniq matnlar) -->
+          <div
+            id="reserveLoading"
+            class="hidden flex-col gap-2 rounded-2xl border-2 border-[#229ED9]/45 bg-gradient-to-br from-[#229ED9]/12 to-[#229ED9]/5 px-4 py-4 text-[#156f9e] shadow-sm dark:border-[#229ED9]/35 dark:from-[#229ED9]/20 dark:to-[#229ED9]/10 dark:text-[#93d9ff]"
+            role="status"
+            aria-live="polite"
+            aria-busy="false"
+          >
+            <div class="flex items-center justify-center gap-3 sm:justify-start">
+              <span class="inline-block h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-[#229ED9] border-t-transparent" aria-hidden="true"></span>
+              <div class="text-left">
+                <p class="font-semibold tracking-tight">Yuborilmoqda...</p>
+                <p class="mt-0.5 text-xs opacity-90">Iltimos, kuting — sahifani yopmang.</p>
+              </div>
+            </div>
+          </div>
 
-        <!-- Questions Side -->
-        <div class="w-[50%] h-[100vh] overflow-y-auto">
-          <div id="questions-container">
-            <!-- Questions will be loaded here -->
+          <button
+            type="submit"
+            id="reserveSubmitBtn"
+            data-default-label="So‘rov yuborish"
+            class="interactive w-full rounded-xl bg-gradient-to-r from-wine to-wine-dark py-4 text-center font-semibold text-white shadow-glow transition hover:brightness-110 enabled:active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-75"
+          >
+            So‘rov yuborish
+          </button>
+
+          <div id="reserveSuccess" class="hidden rounded-2xl border-2 border-emerald-500/45 bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 px-4 py-4 text-emerald-900 shadow-sm dark:border-emerald-400/35 dark:from-emerald-500/20 dark:to-emerald-900/20 dark:text-emerald-100" role="status" aria-live="polite">
+            <div class="flex gap-3 text-left">
+              <i class="fa-solid fa-circle-check mt-0.5 shrink-0 text-xl text-emerald-600 dark:text-emerald-400" aria-hidden="true"></i>
+              <div class="min-w-0 flex-1">
+                <p id="reserveSuccessTitle" class="font-semibold leading-snug"></p>
+                <p id="reserveSuccessHint" class="mt-1.5 text-xs leading-relaxed opacity-90"></p>
+              </div>
+            </div>
+          </div>
+
+          <div id="reserveError" tabindex="-1" class="hidden rounded-2xl border-2 border-red-400/50 bg-gradient-to-br from-red-50 to-red-100/50 px-4 py-4 text-red-950 shadow-sm dark:border-red-500/40 dark:from-red-950/50 dark:to-red-900/30 dark:text-red-50" role="alert" aria-live="assertive">
+            <div class="flex gap-3 text-left">
+              <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0 text-xl text-red-600 dark:text-red-400" aria-hidden="true"></i>
+              <div class="min-w-0 flex-1">
+                <p id="reserveErrorTitle" class="font-semibold leading-snug"></p>
+                <p id="reserveErrorHint" class="mt-1.5 text-xs leading-relaxed opacity-95"></p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-center text-xs leading-relaxed text-charcoal/45 dark:text-cream/45">
+            Ma’lumotlar Telegram orqali administratorga yuboriladi. Internet uzilsa yoki xatolik chiqsa — pastdagi blokda nima qilish kerakligi yoziladi.
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- LOCATION & CONTACT -->
+    <section id="contact" class="border-t border-charcoal/10 bg-white py-20 dark:border-white/10 dark:bg-charcoal md:py-28">
+      <div class="mx-auto max-w-7xl px-4 md:px-6">
+        <div class="grid gap-12 lg:grid-cols-2">
+          <div>
+            <p class="reveal text-sm font-semibold uppercase tracking-widest text-wine dark:text-gold">Joylashuv</p>
+            <h2 class="reveal reveal-delay-1 mt-3 font-display text-4xl font-semibold text-charcoal md:text-5xl dark:text-cream">
+              Bizni toping
+            </h2>
+            <!-- EDIT: Manzil va aloqa -->
+            <ul class="reveal reveal-delay-2 mt-8 space-y-4 text-charcoal/80 dark:text-cream/80">
+              <li class="flex gap-3">
+                <i class="fa-solid fa-location-dot mt-1 text-wine dark:text-gold"></i>
+                <span>Toshkent shahri, [Ko‘cha nomi], [Uy raqami]</span>
+              </li>
+              <li class="flex gap-3">
+                <i class="fa-solid fa-phone mt-1 text-wine dark:text-gold"></i>
+                <a href="tel:+998901112233" class="interactive hover:text-wine dark:hover:text-gold">+998 90 111 22 33</a>
+              </li>
+              <li class="flex gap-3">
+                <i class="fa-solid fa-envelope mt-1 text-wine dark:text-gold"></i>
+                <a href="mailto:hello@ziyofat.uz" class="interactive hover:text-wine dark:hover:text-gold">hello@ziyofat.uz</a>
+              </li>
+              <li class="flex gap-3">
+                <i class="fa-regular fa-clock mt-1 text-wine dark:text-gold"></i>
+                <span>Har kuni 12:00 — 00:00</span>
+              </li>
+            </ul>
+          </div>
+          <div class="reveal overflow-hidden rounded-3xl border border-charcoal/10 shadow-luxe dark:border-white/10">
+            <!-- EDIT: Google Maps — o‘z joyingizni embed qiling (Google Maps → Share → Embed) -->
+            <iframe
+              title="Ziyofat restorani xaritada"
+              class="h-[320px] w-full lg:h-full lg:min-h-[360px]"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2996.2437367287756!2d69.24007377676687!3d41.31108197129996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38ae8b0cc379e9c3%3A0xa5a9323b26912345!2sTashkent%2C%20Uzbekistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </div>
       </div>
-    </main>
+    </section>
+  </main>
 
-    <!-- Question Navigation -->
-    <div
-      id="question-navigation"
-      class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-3 z-40 hidden"
-    >
-      <div class="container mx-auto">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-bold text-gray-700">Question Navigation</h3>
-          <div class="text-gray-600 text-sm">
-            <span id="answered-count">0</span>/<span id="total-questions"
-              >0</span
-            >
-            answered
-          </div>
+  <!-- FOOTER -->
+  <footer class="border-t border-charcoal/10 bg-charcoal py-14 text-cream dark:border-white/10">
+    <div class="mx-auto max-w-7xl px-4 md:px-6">
+      <div class="flex flex-col items-center justify-between gap-8 md:flex-row">
+        <div class="text-center md:text-left">
+          <!-- EDIT: Footer logo/nomi -->
+          <p class="font-display text-3xl font-semibold text-white">Ziyofat</p>
+          <p class="mt-2 max-w-sm text-sm text-cream/55">Fusion kitchen · Premium service · Unforgettable nights.</p>
         </div>
-        <div
-          class="flex flex-wrap gap-1 max-h-20 overflow-y-auto"
-          id="question-nav"
-        >
-          <!-- Question numbers will be inserted here -->
+        <div class="flex gap-4 text-lg">
+          <!-- EDIT: Ijtimoiy tarmoq havolalari -->
+          <a href="#" class="interactive text-cream/70 transition hover:text-gold" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="interactive text-cream/70 transition hover:text-gold" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+          <a href="#" class="interactive text-cream/70 transition hover:text-gold" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
         </div>
       </div>
+      <p class="mt-10 text-center text-xs text-cream/40">
+        © <span id="footerYear"></span> Ziyofat. Barcha huquqlar himoyalangan.
+      </p>
     </div>
+  </footer>
 
-    <!-- Result Modal -->
-    <div
-      id="result-modal"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4"
-    >
-      <div
-        class="bg-white rounded-xl shadow-2xl max-w-4xl w-full"
-        style="animation: slideUp 0.5s"
-      >
-        <div class="p-8">
-          <h2 class="text-3xl font-bold text-blue-800 mb-6">Test Results</h2>
+  <!-- SCRIPTS -->
+  <script>
+    (function () {
+      const html = document.documentElement;
 
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <p class="text-gray-600">Total Questions</p>
-              <p
-                id="total-questions-result"
-                class="text-3xl font-bold text-blue-700"
-              >
-                0
-              </p>
-            </div>
-            <div class="bg-green-50 p-4 rounded-lg">
-              <p class="text-gray-600">Correct Answers</p>
-              <p id="correct-answers" class="text-3xl font-bold text-green-700">
-                0
-              </p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-              <p class="text-gray-600">Answered Questions</p>
-              <p
-                id="answered-questions"
-                class="text-3xl font-bold text-yellow-700"
-              >
-                0
-              </p>
-            </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-              <p class="text-gray-600">Incorrect Answers</p>
-              <p id="incorrect-answers" class="text-3xl font-bold text-red-700">
-                0
-              </p>
-            </div>
-          </div>
+      /* ─── Theme (localStorage) ─── */
+      const themeKey = "ziyofat-theme";
+      function applyTheme(theme) {
+        if (theme === "dark") html.classList.add("dark");
+        else html.classList.remove("dark");
+      }
+      const saved = localStorage.getItem(themeKey);
+      if (saved === "dark" || saved === "light") applyTheme(saved);
+      else if (window.matchMedia("(prefers-color-scheme: dark)").matches) applyTheme("dark");
 
-          <div class="bg-gray-50 p-6 rounded-lg mb-8">
-            <h3 class="text-xl font-bold text-gray-700 mb-4">Time Spent</h3>
-            <p id="time-spent" class="text-2xl font-bold">00:00</p>
-          </div>
-
-          <div class="mb-6">
-            <h3 class="text-xl font-bold text-gray-700 mb-4">Detailed Results</h3>
-            <div id="detailed-results" class="space-y-4 max-h-80 overflow-y-auto">
-              <!-- Detailed results will be shown here -->
-            </div>
-          </div>
-
-          <div class="flex justify-between">
-            <button
-              onclick="closeResults()"
-              class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300"
-            >
-              Close
-            </button>
-            <button
-              onclick="backToTests()"
-              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-            >
-              Back to Tests
-            </button>
-            <button
-              onclick="reviewAnswers()"
-              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-            >
-              <i class="fas fa-eye mr-2"></i>Review Answers
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      // ==================== GLOBAL VARIABLES ====================
-      let allTests = [];
-      let currentTest = null;
-      let timerInterval = null;
-      let timeLeft = 60 * 60;
-      let timeSpent = 0;
-      let isTimerPaused = false;
-      let userAnswers = {};
-      let questionStates = {};
-      let testResults = [];
-      let currentTestIndex = -1;
-
-      // ==================== PAGE LOAD ====================
-      document.addEventListener("DOMContentLoaded", function () {
-        loadTestsFromStorage();
-        displayTestCards();
-        
-        // Check if user was in the middle of a test
-        const savedTestProgress = localStorage.getItem('ielts_test_progress');
-        if (savedTestProgress) {
-          const progress = JSON.parse(savedTestProgress);
-          if (progress.testIndex !== undefined && progress.userAnswers) {
-            const confirmRestore = confirm("You have an unfinished test. Would you like to continue where you left off?");
-            if (confirmRestore) {
-              startTest(progress.testIndex);
-              // Restore previous answers
-              setTimeout(() => {
-                restoreAnswers(progress.userAnswers);
-              }, 500);
-            } else {
-              // Clear saved progress
-              localStorage.removeItem('ielts_test_progress');
-            }
-          }
-        }
+      document.getElementById("themeToggle").addEventListener("click", function () {
+        const next = html.classList.contains("dark") ? "light" : "dark";
+        applyTheme(next);
+        localStorage.setItem(themeKey, next);
       });
 
-      // ==================== ADMIN ACCESS ====================
-      function openAdminPanel() {
-        document
-          .getElementById("admin-password-modal")
-          .classList.remove("hidden");
-        document.getElementById("admin-password-modal").classList.add("flex");
+      /* ─── Mobile menu ─── */
+      const menuBtn = document.getElementById("menuBtn");
+      const mobileNav = document.getElementById("mobileNav");
+      const mobileLinks = mobileNav.querySelectorAll("a");
+      function closeMobile() {
+        mobileNav.classList.add("pointer-events-none", "invisible", "opacity-0", "max-h-0");
+        mobileNav.classList.remove("pointer-events-auto", "visible", "opacity-100", "max-h-[480px]");
+        menuBtn.setAttribute("aria-expanded", "false");
+        menuBtn.querySelector("i").className = "fa-solid fa-bars text-lg";
       }
-
-      function closeAdminModal() {
-        document.getElementById("admin-password-modal").classList.add("hidden");
-        document.getElementById("admin-login-password").value = "";
-        document.getElementById("password-error").classList.add("hidden");
+      function openMobile() {
+        mobileNav.classList.remove("pointer-events-none", "invisible", "opacity-0", "max-h-0");
+        mobileNav.classList.add("pointer-events-auto", "visible", "opacity-100", "max-h-[480px]");
+        menuBtn.setAttribute("aria-expanded", "true");
+        menuBtn.querySelector("i").className = "fa-solid fa-xmark text-lg";
       }
+      menuBtn.addEventListener("click", function () {
+        if (mobileNav.classList.contains("invisible")) openMobile();
+        else closeMobile();
+      });
+      mobileLinks.forEach(function (a) {
+        a.addEventListener("click", closeMobile);
+      });
 
-      function checkAdminPassword() {
-        const password = document.getElementById("admin-login-password").value;
-        const savedPassword =
-          localStorage.getItem("ielts_admin_password") || "admin123";
+      /* ─── Header shadow on scroll ─── */
+      const header = document.getElementById("siteHeader");
+      window.addEventListener(
+        "scroll",
+        function () {
+          if (window.scrollY > 40) header.classList.add("shadow-card");
+          else header.classList.remove("shadow-card");
+        },
+        { passive: true }
+      );
 
-        if (password === savedPassword) {
-          localStorage.setItem("ielts_is_admin", "true");
-          window.open("admin-panel.html", "_blank");
-          closeAdminModal();
-        } else {
-          document.getElementById("password-error").classList.remove("hidden");
-          document.getElementById("admin-login-password").value = "";
+      /* ─── Hero parallax ─── */
+      const heroBg = document.getElementById("heroBg");
+      window.addEventListener(
+        "scroll",
+        function () {
+          const y = window.scrollY;
+          heroBg.style.transform = "translateY(" + y * 0.35 + "px) scale(1.05)";
+        },
+        { passive: true }
+      );
+
+      /* ─── Scroll reveal ─── */
+      const revealEls = document.querySelectorAll(".reveal");
+      const revObs = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              e.target.classList.add("is-visible");
+              revObs.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -30px 0px" }
+      );
+      revealEls.forEach(function (el) {
+        revObs.observe(el);
+      });
+
+      /* ─── Counter animation ─── */
+      function animateCounter(el, target, isFloat) {
+        const dur = 1600;
+        const t0 = performance.now();
+        function ease(t) {
+          return 1 - Math.pow(1 - t, 3);
         }
-      }
-
-      // ==================== TEST SELECTION ====================
-      function loadTestsFromStorage() {
-        try {
-          const savedTests = localStorage.getItem("ielts_tests");
-          allTests = savedTests ? JSON.parse(savedTests) : [];
-        } catch (error) {
-          allTests = [];
+        function frame(now) {
+          const p = Math.min(1, (now - t0) / dur);
+          const v = ease(p) * target;
+          el.textContent = isFloat ? v.toFixed(1) : Math.round(v);
+          if (p < 1) requestAnimationFrame(frame);
+          else el.textContent = isFloat ? target.toFixed(1) : String(Math.round(target));
         }
+        requestAnimationFrame(frame);
       }
+      const counters = document.querySelectorAll(".counter");
+      const countObs = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            const tgt = parseFloat(el.getAttribute("data-target"));
+            const isFloat = String(tgt).indexOf(".") !== -1;
+            animateCounter(el, tgt, isFloat);
+            countObs.unobserve(el);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      counters.forEach(function (c) {
+        countObs.observe(c);
+      });
 
-      function displayTestCards() {
-        const container = document.getElementById("test-cards-container");
-        const loading = document.getElementById("loading-state");
-        const empty = document.getElementById("empty-state");
-
-        loading.classList.remove("hidden");
-        empty.classList.add("hidden");
-        container.innerHTML = "";
-
-        setTimeout(() => {
-          loading.classList.add("hidden");
-
-          if (allTests.length === 0) {
-            empty.classList.remove("hidden");
-            return;
-          }
-
-          container.innerHTML = allTests
-            .map(
-              (test, index) => `
-                    <div class="test-card bg-white rounded-xl shadow-lg p-6" onclick="startTest(${index})">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex-1">
-                                <h3 class="text-xl font-bold text-blue-700 mb-2">${
-                                  test.title || "IELTS Test"
-                                }</h3>
-                                <p class="text-gray-600 text-sm mb-3">${
-                                  test.passage?.title || "Reading Passage"
-                                }</p>
-                            </div>
-                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                                ${test.questions?.length || 0} Q
-                            </span>
-                        </div>
-                        
-                        <div class="flex items-center text-gray-500 text-sm mb-4">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span>${test.duration || 60} minutes</span>
-                        </div>
-                        
-                        <div class="flex justify-between items-center">
-                            <div class="text-sm text-gray-500">
-                                <i class="fas fa-calendar mr-1"></i>
-                                ${new Date(
-                                  parseInt(test.id)
-                                ).toLocaleDateString()}
-                            </div>
-                            <button class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                                Start Test <i class="fas fa-arrow-right ml-2"></i>
-                            </button>
-                        </div>
-                    </div>
-                `
-            )
-            .join("");
-        }, 800);
+      /* ─── Lightbox ─── */
+      const lb = document.getElementById("lightbox");
+      const lbImg = document.getElementById("lightboxImg");
+      document.querySelectorAll(".gallery-item img").forEach(function (img) {
+        img.closest(".gallery-item").addEventListener("click", function () {
+          const u = img.src.split("?")[0];
+          lbImg.src = u + "?auto=format&fit=crop&w=1600&q=90";
+          lbImg.alt = img.alt || "";
+          lb.classList.remove("hidden");
+          lb.classList.add("flex");
+          document.body.style.overflow = "hidden";
+        });
+      });
+      function closeLb() {
+        lb.classList.add("hidden");
+        lb.classList.remove("flex");
+        document.body.style.overflow = "";
       }
+      document.getElementById("lightboxClose").addEventListener("click", closeLb);
+      lb.addEventListener("click", function (e) {
+        if (e.target === lb) closeLb();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeLb();
+      });
 
-      // ==================== TEST INTERFACE ====================
-      function startTest(testIndex) {
-        currentTestIndex = testIndex;
-        currentTest = allTests[testIndex];
-
-        // Show test interface
-        document.getElementById("test-selection-page").classList.add("hidden");
-        document
-          .getElementById("test-interface-page")
-          .classList.remove("hidden");
-        document.getElementById("main-header").classList.remove("hidden");
-        document
-          .getElementById("question-navigation")
-          .classList.remove("hidden");
-
-        // Display passage
-        document.getElementById("passage-title-display").textContent =
-          currentTest.passage?.title || "Reading Passage";
-        document.getElementById("passage-content-display").innerHTML =
-          currentTest.passage?.content || "";
-
-        // Display questions
-        displayQuestions();
-
-        // Setup timer
-        timeLeft = (currentTest.duration || 60) * 60;
-        timeSpent = 0;
-        isTimerPaused = false;
-        startTimer();
-
-        // Initialize answers
-        userAnswers = {};
-        questionStates = {};
-
-        // Setup navigation
-        setupQuestionNavigation();
-
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: "smooth" });
-
-        // Auto-save progress every 10 seconds
-        setInterval(() => {
-          if (currentTest) {
-            saveTestProgress();
-          }
-        }, 10000);
-      }
-
-      function saveTestProgress() {
-        const progress = {
-          testIndex: currentTestIndex,
-          userAnswers: userAnswers,
-          timeLeft: timeLeft,
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem('ielts_test_progress', JSON.stringify(progress));
-      }
-
-      function restoreAnswers(savedAnswers) {
-        if (!savedAnswers) return;
-        
-        userAnswers = { ...savedAnswers };
-        
-        // Update UI with saved answers
-        Object.entries(savedAnswers).forEach(([questionNum, answer]) => {
-          const questionNumInt = parseInt(questionNum);
-          
-          // For radio buttons
-          const radioInput = document.querySelector(`input[name="q${questionNumInt}"][value="${answer}"]`);
-          if (radioInput) {
-            radioInput.checked = true;
-            updateQuestionState(questionNumInt, "answered");
-          }
-          
-          // For text inputs
-          const textInput = document.querySelector(`input[type="text"][data-question="${questionNumInt}"]`);
-          if (textInput) {
-            textInput.value = answer;
-            updateQuestionState(questionNumInt, "answered");
+      /* ─── Testimonials carousel ─── */
+      const track = document.getElementById("testimonialTrack");
+      const slides = track.querySelectorAll(".testimonial-slide");
+      let idx = 0;
+      const dotsWrap = document.getElementById("testDots");
+      slides.forEach(function (_, i) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className =
+          i === 0
+            ? "h-2.5 w-2.5 rounded-full bg-wine transition dark:bg-gold"
+            : "h-2.5 w-2.5 rounded-full bg-charcoal/25 transition dark:bg-cream/25";
+        b.setAttribute("aria-label", "Sharh " + (i + 1));
+        b.addEventListener("click", function () {
+          go(i);
+        });
+        dotsWrap.appendChild(b);
+      });
+      const dots = dotsWrap.querySelectorAll("button");
+      function go(i) {
+        idx = (i + slides.length) % slides.length;
+        track.style.transform = "translateX(-" + idx * 100 + "%)";
+        dots.forEach(function (d, j) {
+          if (j === idx) {
+            d.className = "h-2.5 w-2.5 rounded-full bg-wine transition dark:bg-gold";
+          } else {
+            d.className = "h-2.5 w-2.5 rounded-full bg-charcoal/25 transition dark:bg-cream/25";
           }
         });
-        
-        updateAnsweredCount();
+      }
+      document.getElementById("prevTest").addEventListener("click", function () {
+        go(idx - 1);
+      });
+      document.getElementById("nextTest").addEventListener("click", function () {
+        go(idx + 1);
+      });
+      setInterval(function () {
+        go(idx + 1);
+      }, 7000);
+
+      /* ─── Reservation → Telegram Bot API ─── */
+
+      /*
+       * ████████████████████████████████████████████████████████████████████████████
+       *
+       *   FAQAT SHU IKKI SATRNI O‘ZGARTIRING
+       *
+       *   Quyidagi BOT_TOKEN va CHAT_ID qiymatlari faqat placeholder (`__BOT_TOKEN__`,
+       *   `__CHAT_ID__`). Ularni @BotFather dan olingan token va o‘z Telegram chat
+       *   ID ingiz bilan almashtiring. Haqiqiy tokenni jamoat repoga qo‘ymang.
+       *
+       *   Ixtiyoriy xavfsizlik: `window.__ZIYOFAT_TELEGRAM__ = { botToken, chatId }`
+       *   ni alohida .gitignore qilingan skriptda berish mumkin — kod avvalo shuni o‘qiydi.
+       *
+       * ████████████████████████████████████████████████████████████████████████████
+       */
+      const TG_TOKEN_PLACEHOLDER = "__BOT_TOKEN__";
+      const TG_CHAT_PLACEHOLDER = "__CHAT_ID__";
+
+      let BOT_TOKEN = TG_TOKEN_PLACEHOLDER;
+      let CHAT_ID = TG_CHAT_PLACEHOLDER;
+
+      const UZ_PHONE_HINT =
+        "Namuna: +998 90 123 45 67 yoki 998901234567. Faqat O‘zbekiston mobil raqami.";
+
+      /** Telegram matnida max uzunlik */
+      const TG_MAX_LEN = 4090;
+
+      /**
+       * Placeholder almashtirilgan va ixtiyoriy inject tekshiruvi.
+       * @returns {{ token: string, chat: string } | null}
+       */
+      function resolveTelegramCredentials() {
+        const inject = window.__ZIYOFAT_TELEGRAM__;
+        let token = String(BOT_TOKEN).trim();
+        let chat = String(CHAT_ID).trim();
+
+        if (inject && typeof inject === "object") {
+          const t = inject.botToken ?? inject.BOT_TOKEN;
+          const c = inject.chatId ?? inject.CHAT_ID;
+          if (typeof t === "string" && t.trim()) token = t.trim();
+          if (c !== undefined && c !== null) chat = String(c).trim();
+        }
+
+        const tokenOk =
+          token.length > 0 &&
+          token !== TG_TOKEN_PLACEHOLDER &&
+          !token.includes("__BOT_TOKEN__");
+
+        const chatOk =
+          chat.length > 0 &&
+          chat !== TG_CHAT_PLACEHOLDER &&
+          !chat.includes("__CHAT_ID__");
+
+        if (!tokenOk || !chatOk) return null;
+        return { token, chat };
       }
 
-      function displayQuestions() {
-        const container = document.getElementById("questions-container");
-        container.innerHTML = "";
+      /** Faqat raqamlar; mobil uchun 998 + 9 raqam */
+      function normalizeUzPhoneDigits(raw) {
+        const digits = String(raw || "").replace(/\D/g, "");
+        if (digits.startsWith("998") && digits.length === 12) return digits;
+        if (digits.length === 9) return "998" + digits;
+        return digits;
+      }
 
-        if (!currentTest.questions || currentTest.questions.length === 0) {
-          container.innerHTML =
-            '<p class="text-gray-500 p-6">No questions available.</p>';
+      function isValidUzPhone(digits) {
+        return /^998[0-9]{9}$/.test(digits);
+      }
+
+      function formatPhoneDisplay(digits) {
+        if (!/^998[0-9]{9}$/.test(digits)) return digits;
+        const rest = digits.slice(3);
+        return (
+          "+998 " +
+          rest.slice(0, 2) +
+          " " +
+          rest.slice(2, 5) +
+          " " +
+          rest.slice(5, 7) +
+          " " +
+          rest.slice(7, 9)
+        );
+      }
+
+      /** Kalendar sanasi (mahalliy vaqt, vaqt zonasi muammosiz) */
+      function parseIsoDateOnly(iso) {
+        const parts = String(iso).split("-").map(Number);
+        if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return null;
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+
+      function startOfTodayLocal() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      }
+
+      /** Bron sanasi bugun yoki kelajak bo‘lishi kerak */
+      function isReservationDateValid(isoDateStr) {
+        const d = parseIsoDateOnly(isoDateStr);
+        if (!d) return false;
+        const today = startOfTodayLocal();
+        return d.getTime() >= today.getTime();
+      }
+
+      /** #r-date uchun minimal sana — bugun */
+      function setReservationDateMin() {
+        const input = document.getElementById("r-date");
+        if (!input) return;
+        const t = startOfTodayLocal();
+        const y = t.getFullYear();
+        const m = String(t.getMonth() + 1).padStart(2, "0");
+        const day = String(t.getDate()).padStart(2, "0");
+        input.min = `${y}-${m}-${day}`;
+      }
+
+      /**
+       * Frontend validatsiyasi — barcha xabarlar o‘zbekcha.
+       * @returns {{ ok: true } | { ok: false, fieldId: string, title: string, hint: string }}
+       */
+      function validateReserveForm(form) {
+        const nameEl = form.querySelector("#r-name");
+        const phoneEl = form.querySelector("#r-phone");
+        const dateEl = form.querySelector("#r-date");
+        const guestsEl = form.querySelector("#r-guests");
+        const msgEl = form.querySelector("#r-msg");
+
+        const name = (nameEl.value || "").trim();
+        if (name.length < 2) {
+          return {
+            ok: false,
+            fieldId: "r-name",
+            title: "Ism to‘liq emas",
+            hint: "Ism kamida 2 ta harf bo‘lishi kerak.",
+          };
+        }
+
+        const phoneDigits = normalizeUzPhoneDigits(phoneEl.value);
+        if (!isValidUzPhone(phoneDigits)) {
+          return {
+            ok: false,
+            fieldId: "r-phone",
+            title: "Telefon raqami noto‘g‘ri",
+            hint: UZ_PHONE_HINT,
+          };
+        }
+
+        const dateVal = dateEl.value;
+        if (!dateVal) {
+          return {
+            ok: false,
+            fieldId: "r-date",
+            title: "Sanani tanlang",
+            hint: "Kelajakdagi kunni tanlang (bugun ham mumkin).",
+          };
+        }
+        if (!isReservationDateValid(dateVal)) {
+          return {
+            ok: false,
+            fieldId: "r-date",
+            title: "Sana o‘tmishda bo‘lmasligi kerak",
+            hint: "Bugungi kun yoki undan keyingi sanani tanlang.",
+          };
+        }
+
+        const guestsNum = Number(guestsEl.value);
+        if (
+          !Number.isInteger(guestsNum) ||
+          guestsNum < 1 ||
+          guestsNum > 20
+        ) {
+          return {
+            ok: false,
+            fieldId: "r-guests",
+            title: "Mehmonlar soni ruxsat etilgan oralig‘da emas",
+            hint: "1 dan 20 gacha butun son kiriting.",
+          };
+        }
+
+        const msg = (msgEl.value || "").trim();
+        if (msg.length > 1200) {
+          return {
+            ok: false,
+            fieldId: "r-msg",
+            title: "Izoh juda uzun",
+            hint: "Izohni qisqartirib yozing (taxminan 1200 belgidan oshmasin).",
+          };
+        }
+
+        return { ok: true };
+      }
+
+      function tgTrim(str, max) {
+        let s = String(str || "")
+          .replace(/\r/g, "")
+          .trim();
+        if (s.length > max) s = s.slice(0, max) + "…";
+        return s || "—";
+      }
+
+      function tgFormatDate(isoDate) {
+        if (!isoDate) return "—";
+        const p = String(isoDate).split("-");
+        if (p.length !== 3) return isoDate;
+        return `${p[2]}.${p[1]}.${p[0]}`;
+      }
+
+      function buildReserveTelegramMessage(form, phoneDigits) {
+        const name = tgTrim(form.querySelector("#r-name").value, 120);
+        const phonePretty = formatPhoneDisplay(phoneDigits);
+        const dateRaw = form.querySelector("#r-date").value;
+        const guests = tgTrim(form.querySelector("#r-guests").value, 10);
+        const msg = tgTrim(form.querySelector("#r-msg").value, 800);
+        const now = new Date();
+        const lines = [
+          "🍽 ZIYOFAT — yangi bron so‘rovi",
+          "",
+          "👤 Ism: " + name,
+          "📞 Telefon: " + phonePretty,
+          "📅 Sana: " + tgFormatDate(dateRaw),
+          "👥 Mehmonlar soni: " + guests,
+          "💬 Izoh: " + msg,
+          "",
+          "───",
+          "📌 Yuborilgan vaqt: " +
+            now.toLocaleString("uz-UZ", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            }),
+        ];
+        let text = lines.join("\n");
+        if (text.length > TG_MAX_LEN) text = text.slice(0, TG_MAX_LEN) + "…";
+        return text;
+      }
+
+      /** Telegram API inglizcha xabarlarini o‘zbekcha + nima qilish kerak */
+      function mapTelegramApiError(description) {
+        if (!description) {
+          return {
+            title: "Telegram javobi tushunarsiz",
+            hint: "Internet ulanishini va BOT_TOKEN / CHAT_ID ni tekshiring. Keyin qayta urining.",
+          };
+        }
+        const d = String(description).toLowerCase();
+        if (d.includes("chat not found"))
+          return {
+            title: "Chat topilmadi",
+            hint: 'Telegramda botingizni ochib «Start» bosing. CHAT_ID ni tekshiring (shaxsiy ID yoki guruh). Qayerdan olish — sahifa oxiridagi qo‘llanmaga qarang.',
+          };
+        if (d.includes("unauthorized"))
+          return {
+            title: "Bot kaliti (token) noto‘g‘ri",
+            hint: "@BotFather dan yangi token oling va BOT_TOKEN ni yangilang. Eski token bekor qilingan bo‘lishi mumkin.",
+          };
+        if (d.includes("blocked"))
+          return {
+            title: "Bot bloklangan",
+            hint: "Telegramda bot bilan chatni ochib, blokdan chiqaring yoki botni qayta qo‘shing.",
+          };
+        if (d.includes("too large") || d.includes("message is too long"))
+          return {
+            title: "Xabar juda uzun",
+            hint: "Izohni qisqartirib qayta urinib ko‘ring.",
+          };
+        return {
+          title: "Telegram serveri javobi",
+          hint:
+            "Texnik tafsilot: " +
+            String(description) +
+            ". Token va chat ID ni tekshiring; muammo davom etsa, boshqa tarmoq yoki brauzerda sinang.",
+        };
+      }
+
+      /** Ikki rAF — layoutdan keyin silliq scroll */
+      function scrollIntoViewSmooth(el, block) {
+        if (!el) return;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.scrollIntoView({ behavior: "smooth", block: block || "nearest" });
+          });
+        });
+      }
+
+      function showReserveSuccess(title, hint) {
+        const box = document.getElementById("reserveSuccess");
+        document.getElementById("reserveSuccessTitle").textContent = title;
+        const hintEl = document.getElementById("reserveSuccessHint");
+        hintEl.textContent = hint;
+        hintEl.classList.toggle("hidden", !hint);
+        box.classList.remove("hidden");
+      }
+
+      function showReserveError(title, hint) {
+        const box = document.getElementById("reserveError");
+        document.getElementById("reserveErrorTitle").textContent = title;
+        const hintEl = document.getElementById("reserveErrorHint");
+        hintEl.textContent = hint || "";
+        hintEl.classList.toggle("hidden", !hint);
+        box.classList.remove("hidden");
+        scrollIntoViewSmooth(box, "nearest");
+      }
+
+      function hideReserveFeedback() {
+        document.getElementById("reserveSuccess").classList.add("hidden");
+        document.getElementById("reserveError").classList.add("hidden");
+      }
+
+      function setLoading(isLoading, loadingEl, btn, defaultLabel) {
+        if (isLoading) {
+          loadingEl.classList.remove("hidden");
+          loadingEl.classList.add("flex", "flex-col");
+          loadingEl.setAttribute("aria-busy", "true");
+          btn.disabled = true;
+          btn.textContent = "Yuborilmoqda...";
+        } else {
+          loadingEl.classList.add("hidden");
+          loadingEl.classList.remove("flex", "flex-col");
+          loadingEl.setAttribute("aria-busy", "false");
+          btn.disabled = false;
+          btn.textContent = defaultLabel;
+        }
+      }
+
+      setReservationDateMin();
+
+      document.getElementById("reserveForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const form = this;
+        const btn = document.getElementById("reserveSubmitBtn");
+        const loadingEl = document.getElementById("reserveLoading");
+        const defaultLabel =
+          btn.getAttribute("data-default-label") || "So‘rov yuborish";
+
+        hideReserveFeedback();
+
+        const credentials = resolveTelegramCredentials();
+        if (!credentials) {
+          showReserveError(
+            "Telegram hali sozlanmagan",
+            "Yuqoridagi FAQAT SHU IKKI SATRNI O‘ZGARTIRING blokida BOT_TOKEN va CHAT_ID ni haqiqiy qiymat bilan almashtiring. Tokenni ochiq GitHub ga joylamang. Aloxida skriptda window.__ZIYOFAT_TELEGRAM__ ham ishlatiladi — qo‘llanma sahifa oxirida."
+          );
           return;
         }
 
-        // Group questions by sections
-        let currentSection = 1;
-        let sectionStart = 1;
-        let sectionHTML = "";
-
-        currentTest.questions.forEach((question, index) => {
-          if (index === 0 || question.number === 1) {
-            if (sectionHTML) {
-              container.innerHTML += sectionHTML;
-            }
-            const sectionEnd = Math.min(
-              question.number + 5,
-              currentTest.questions.length
-            );
-            sectionHTML = `
-                        <section class="bg-white p-6 rounded-xl shadow-lg mb-6">
-                            <h3 class="text-xl font-bold text-blue-700 mb-6">Questions ${question.number}-${sectionEnd}</h3>
-                            <div class="space-y-6">
-                    `;
-            sectionStart = question.number;
-          }
-
-          // Add question
-          sectionHTML += generateQuestionHTML(question);
-
-          // Close section if last question or next starts new section
-          if (
-            index === currentTest.questions.length - 1 ||
-            currentTest.questions[index + 1]?.number === 1
-          ) {
-            sectionHTML += `
-                            </div>
-                        </section>
-                    `;
-            container.innerHTML += sectionHTML;
-          }
-        });
-
-        // Add event listeners
-        document.querySelectorAll(".answer-input").forEach((input) => {
-          input.addEventListener("change", saveUserAnswer);
-          if (input.type === "text") {
-            input.addEventListener("input", saveUserAnswer);
-          }
-        });
-      }
-
-      function generateQuestionHTML(question) {
-        if (!question) return "";
-
-        switch (question.type) {
-          case "short-answer":
-          case "sentence-completion":
-            return `
-                        <div class="question-group" data-question="${question.number}">
-                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
-                            <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
-                                   data-question="${question.number}" placeholder="Type your answer here...">
-                            <div class="correct-answer-display mt-2 hidden">
-                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
-                            </div>
-                        </div>
-                    `;
-
-          case "true-false-notgiven":
-            return `
-                        <div class="question-group" data-question="${question.number}">
-                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
-                            <div class="grid grid-cols-3 gap-5">
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="TRUE">
-                                    <input type="radio" name="q${question.number}" value="TRUE" 
-                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
-                                    <span>TRUE</span>
-                                </label>
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="FALSE">
-                                    <input type="radio" name="q${question.number}" value="FALSE" 
-                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
-                                    <span>FALSE</span>
-                                </label>
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="NOT GIVEN">
-                                    <input type="radio" name="q${question.number}" value="NOT GIVEN" 
-                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
-                                    <span>NOT GIVEN</span>
-                                </label>
-                            </div>
-                            <div class="correct-answer-display mt-2 hidden">
-                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
-                            </div>
-                        </div>
-                    `;
-
-          case "multiple-choice":
-            let optionsHTML = "";
-            if (question.options) {
-              Object.entries(question.options).forEach(([letter, text]) => {
-                optionsHTML += `
-                                <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer answer-label" data-value="${letter}">
-                                    <input type="radio" name="q${question.number}" value="${letter}" 
-                                           class="mr-3 h-5 w-5 answer-input" data-question="${question.number}">
-                                    <span>${letter}. ${text}</span>
-                                </label>
-                            `;
-              });
-            }
-
-            return `
-                        <div class="question-group" data-question="${question.number}">
-                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
-                            <div class="space-y-3">
-                                ${optionsHTML}
-                            </div>
-                            <div class="correct-answer-display mt-2 hidden">
-                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
-                            </div>
-                        </div>
-                    `;
-
-          default:
-            return `
-                        <div class="question-group" data-question="${question.number}">
-                            <p class="mb-2 font-medium"><strong>${question.number}.</strong> ${question.text}</p>
-                            <input type="text" class="answer-input w-full border border-gray-300 rounded p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none" 
-                                   data-question="${question.number}" placeholder="Type your answer here...">
-                            <div class="correct-answer-display mt-2 hidden">
-                                <small class="text-green-600 font-medium"><i class="fas fa-check-circle mr-1"></i>Correct answer: <span class="correct-value"></span></small>
-                            </div>
-                        </div>
-                    `;
+        const validation = validateReserveForm(form);
+        if (!validation.ok) {
+          showReserveError(validation.title, validation.hint);
+          const el = document.getElementById(validation.fieldId);
+          if (el) el.focus();
+          return;
         }
-      }
 
-      // ==================== TIMER FUNCTIONS ====================
-      function startTimer() {
-        if (timerInterval) clearInterval(timerInterval);
+        const phoneDigits = normalizeUzPhoneDigits(
+          form.querySelector("#r-phone").value
+        );
 
-        timerInterval = setInterval(() => {
-          if (!isTimerPaused) {
-            timeLeft--;
-            timeSpent++;
+        setLoading(true, loadingEl, btn, defaultLabel);
 
-            if (timeLeft <= 0) {
-              clearInterval(timerInterval);
-              submitTest();
+        const url =
+          "https://api.telegram.org/bot" + credentials.token + "/sendMessage";
+
+        const payload = {
+          chat_id: credentials.chat,
+          text: buildReserveTelegramMessage(form, phoneDigits),
+          disable_web_page_preview: true,
+        };
+
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then((res) =>
+            res.json().then((data) => ({ okHttp: res.ok, status: res.status, data }))
+          )
+          .then((result) => {
+            if (!result.okHttp || !result.data.ok) {
+              const mapped = mapTelegramApiError(
+                result.data && result.data.description
+              );
+              throw { userMessage: mapped };
+            }
+            showReserveSuccess(
+              "Rahmat! So‘rovingiz qabul qilindi",
+              "Tez orada administratorlarimiz siz bilan bog‘lanadi. Telefonni yaqin tuting."
+            );
+            form.reset();
+            setReservationDateMin();
+            const reserveSection = document.getElementById("reserve");
+            if (reserveSection) {
+              scrollIntoViewSmooth(reserveSection, "start");
+            }
+          })
+          .catch((err) => {
+            if (err && err.userMessage) {
+              showReserveError(err.userMessage.title, err.userMessage.hint);
               return;
             }
-
-            updateTimerDisplay();
-          }
-        }, 1000);
-
-        updateTimerDisplay();
-      }
-
-      function updateTimerDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById("timer").textContent = `${minutes
-          .toString()
-          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-      }
-
-      // ==================== ANSWER HANDLING ====================
-      function saveUserAnswer(event) {
-        const questionNum = parseInt(event.target.dataset.question);
-
-        if (event.target.type === "radio") {
-          userAnswers[questionNum] = event.target.value;
-        } else if (event.target.type === "text") {
-          userAnswers[questionNum] = event.target.value.trim().toLowerCase();
-        }
-
-        updateQuestionState(questionNum, "answered");
-        updateAnsweredCount();
-        
-        // Save progress
-        saveTestProgress();
-      }
-
-      function updateQuestionState(questionNum, state) {
-        const button = document.querySelector(
-          `.question-nav-btn[data-question="${questionNum}"]`
-        );
-        if (!button) return;
-
-        button.classList.remove("bg-white", "bg-blue-500", "bg-green-500", "bg-red-500");
-
-        if (state === "answered") {
-          button.classList.add("bg-blue-500", "text-white");
-          questionStates[questionNum] = "answered";
-        } else if (state === "correct") {
-          button.classList.add("bg-green-500", "text-white");
-        } else if (state === "incorrect") {
-          button.classList.add("bg-red-500", "text-white");
-        }
-      }
-
-      function updateAnsweredCount() {
-        const answeredCount = Object.values(questionStates).filter(
-          (state) => state === "answered"
-        ).length;
-        const totalQuestions = currentTest?.questions?.length || 0;
-
-        document.getElementById("answered-count").textContent = answeredCount;
-        document.getElementById("total-questions").textContent = totalQuestions;
-        document.getElementById("answered-questions").textContent =
-          answeredCount;
-      }
-
-      function setupQuestionNavigation() {
-        const navContainer = document.getElementById("question-nav");
-        navContainer.innerHTML = "";
-
-        if (!currentTest.questions) return;
-
-        currentTest.questions.forEach((question) => {
-          const button = document.createElement("button");
-          button.className =
-            "question-nav-btn w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-100";
-          button.textContent = question.number;
-          button.dataset.question = question.number;
-          button.onclick = () => scrollToQuestion(question.number);
-          navContainer.appendChild(button);
-        });
-
-        updateAnsweredCount();
-      }
-
-      function scrollToQuestion(questionNumber) {
-        const questionElement = document.querySelector(
-          `[data-question="${questionNumber}"]`
-        );
-        if (questionElement) {
-          questionElement.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
-
-      // ==================== TEST SUBMISSION ====================
-      function submitTest() {
-        if (timerInterval) clearInterval(timerInterval);
-
-        // Clear saved progress
-        localStorage.removeItem('ielts_test_progress');
-
-        // Disable inputs
-        document.querySelectorAll(".answer-input").forEach((input) => {
-          input.disabled = true;
-        });
-
-        // Calculate results
-        let correctCount = 0;
-        let totalQuestions = currentTest.questions?.length || 0;
-        testResults = [];
-
-        if (currentTest.correctAnswers) {
-          currentTest.questions?.forEach((question) => {
-            const userAnswer = userAnswers[question.number];
-            const correctAnswer = currentTest.correctAnswers[question.number];
-            let isCorrect = false;
-
-            if (userAnswer && correctAnswer) {
-              isCorrect =
-                userAnswer.toString().toLowerCase() ===
-                correctAnswer.toString().toLowerCase();
-              if (isCorrect) correctCount++;
-
-              // Save result
-              testResults.push({
-                questionNumber: question.number,
-                userAnswer: userAnswer,
-                correctAnswer: correctAnswer,
-                isCorrect: isCorrect,
-                questionText: question.text
-              });
-
-              // Update navigation button color
-              updateQuestionState(question.number, isCorrect ? "correct" : "incorrect");
+            const raw = err && err.message ? String(err.message) : String(err);
+            if (
+              raw.includes("Failed to fetch") ||
+              raw.includes("NetworkError") ||
+              raw.includes("Load failed")
+            ) {
+              showReserveError(
+                "Internet yoki serverga ulanib bo‘lmadi",
+                "Wi‑Fi / mobil tarmoqni tekshiring. VPN ishlatsangiz, o‘chirib ko‘ring. Keyin «So‘rov yuborish»ni qayta bosing. Muammo davom etsa — birozdan keyin qayta urinib ko‘ring."
+              );
+              return;
             }
+            showReserveError(
+              "Yuborishda xatolik",
+              "Brauzerni yangilab qayta urinib ko‘ring. Agar yana chiqsa, TOKEN va CHAT_ID to‘g‘riligini tekshiring."
+            );
+          })
+          .finally(() => {
+            setLoading(false, loadingEl, btn, defaultLabel);
           });
-        }
+      });
 
-        // Show results modal
-        showResults(correctCount, totalQuestions);
-      }
+      /* ─── Back to top ─── */
+      const backTop = document.getElementById("backTop");
+      window.addEventListener(
+        "scroll",
+        function () {
+          backTop.classList.toggle("hidden", window.scrollY < 400);
+          backTop.classList.toggle("flex", window.scrollY >= 400);
+        },
+        { passive: true }
+      );
+      backTop.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
 
-      function showResults(correctCount, totalQuestions) {
-        document.getElementById("total-questions-result").textContent =
-          totalQuestions;
-        document.getElementById("correct-answers").textContent = correctCount;
-        document.getElementById("incorrect-answers").textContent =
-          totalQuestions - correctCount;
-
-        // Format time spent
-        const minutesSpent = Math.floor(timeSpent / 60);
-        const secondsSpent = timeSpent % 60;
-        document.getElementById("time-spent").textContent = `${minutesSpent
-          .toString()
-          .padStart(2, "0")}:${secondsSpent.toString().padStart(2, "0")}`;
-
-        // Show detailed results
-        showDetailedResults();
-
-        // Show modal
-        document.getElementById("result-modal").classList.remove("hidden");
-        document.getElementById("result-modal").classList.add("flex");
-      }
-
-      function showDetailedResults() {
-        const container = document.getElementById("detailed-results");
-        container.innerHTML = "";
-
-        testResults.forEach(result => {
-          const resultElement = document.createElement("div");
-          resultElement.className = `p-4 rounded-lg ${result.isCorrect ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`;
-          
-          resultElement.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <h4 class="font-bold ${result.isCorrect ? 'text-green-800' : 'text-red-800'}">
-                  Question ${result.questionNumber}
-                </h4>
-                <p class="text-gray-600 text-sm mt-1">${result.questionText}</p>
-              </div>
-              <span class="px-3 py-1 rounded-full text-sm font-bold ${result.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                ${result.isCorrect ? '✓ Correct' : '✗ Incorrect'}
-              </span>
-            </div>
-            <div class="mt-3 grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">Your Answer</p>
-                <p class="font-medium ${result.isCorrect ? 'text-green-700' : 'text-red-700'}">${result.userAnswer || 'Not answered'}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Correct Answer</p>
-                <p class="font-medium text-green-700">${result.correctAnswer}</p>
-              </div>
-            </div>
-          `;
-          
-          container.appendChild(resultElement);
+      /* ─── Custom cursor (desktop): tinglovchilar bir marta ─── */
+      const dot = document.getElementById("cursorDot");
+      const fork = document.getElementById("cursorFork");
+      let cursorListenersBound = false;
+      function bindCursorListeners() {
+        if (cursorListenersBound) return;
+        cursorListenersBound = true;
+        document.addEventListener(
+          "mousemove",
+          function (e) {
+            dot.style.left = e.clientX + "px";
+            dot.style.top = e.clientY + "px";
+            fork.style.left = e.clientX + 28 + "px";
+            fork.style.top = e.clientY + 28 + "px";
+          },
+          { passive: true }
+        );
+        const interactiveSel =
+          'a, button, input, textarea, select, .interactive, .menu-card, .gallery-item, [role="dialog"]';
+        document.querySelectorAll(interactiveSel).forEach(function (node) {
+          node.addEventListener("mouseenter", function () {
+            dot.classList.add("is-hover");
+            fork.classList.add("visible");
+          });
+          node.addEventListener("mouseleave", function () {
+            dot.classList.remove("is-hover");
+            fork.classList.remove("visible");
+          });
         });
       }
-
-      function reviewAnswers() {
-        closeResults();
-        
-        // Show correct answers for each question
-        currentTest.questions?.forEach(question => {
-          const questionDiv = document.querySelector(`[data-question="${question.number}"]`);
-          if (!questionDiv) return;
-          
-          const correctAnswer = currentTest.correctAnswers[question.number];
-          const userAnswer = userAnswers[question.number];
-          
-          // Show correct answer display
-          const correctAnswerDisplay = questionDiv.querySelector('.correct-answer-display');
-          const correctValueSpan = questionDiv.querySelector('.correct-value');
-          
-          if (correctAnswerDisplay && correctValueSpan) {
-            correctAnswerDisplay.classList.remove('hidden');
-            correctValueSpan.textContent = correctAnswer;
-          }
-          
-          // Highlight user's answer
-          highlightUserAnswer(question.number, userAnswer, correctAnswer);
-        });
+      function showCustomCursor() {
+        if (window.innerWidth < 1024) return;
+        bindCursorListeners();
+        document.documentElement.classList.add("use-custom-cursor");
+        document.body.classList.add("custom-cursor-active");
+        dot.classList.remove("hidden");
+        fork.classList.remove("hidden");
       }
-
-      function highlightUserAnswer(questionNumber, userAnswer, correctAnswer) {
-        const questionDiv = document.querySelector(`[data-question="${questionNumber}"]`);
-        if (!questionDiv) return;
-        
-        // For radio button questions
-        const answerLabels = questionDiv.querySelectorAll('.answer-label');
-        answerLabels.forEach(label => {
-          const value = label.getAttribute('data-value');
-          if (value === userAnswer) {
-            if (userAnswer === correctAnswer) {
-              label.classList.add('correct-radio');
-            } else {
-              label.classList.add('incorrect-radio');
-            }
-          }
-          
-          // Highlight correct answer if user got it wrong
-          if (value === correctAnswer && userAnswer !== correctAnswer) {
-            label.classList.add('correct-answer');
-          }
-        });
-        
-        // For text input questions
-        const textInput = questionDiv.querySelector('input[type="text"]');
-        if (textInput) {
-          if (userAnswer === correctAnswer) {
-            textInput.classList.add('correct-text');
-          } else {
-            textInput.classList.add('incorrect-text');
-          }
-        }
+      function hideCustomCursor() {
+        document.body.classList.remove("custom-cursor-active");
+        document.documentElement.classList.remove("use-custom-cursor");
+        dot.classList.add("hidden");
+        fork.classList.add("hidden");
       }
-
-      function closeResults() {
-        document.getElementById("result-modal").classList.add("hidden");
-      }
-
-      function backToTests() {
-        // Clear saved progress
-        localStorage.removeItem('ielts_test_progress');
-        
-        closeResults();
-        document.getElementById("test-interface-page").classList.add("hidden");
-        document
-          .getElementById("test-selection-page")
-          .classList.remove("hidden");
-        document.getElementById("main-header").classList.add("hidden");
-        document.getElementById("question-navigation").classList.add("hidden");
-
-        // Refresh tests list
-        loadTestsFromStorage();
-        displayTestCards();
-      }
-
-      // ==================== EVENT LISTENERS ====================
-      document.getElementById("pause-timer").addEventListener("click", function () {
-        isTimerPaused = !isTimerPaused;
-
-        if (isTimerPaused) {
-          this.innerHTML = '<i class="fas fa-play"></i> Resume';
-        } else {
-          this.innerHTML = '<i class="fas fa-pause"></i> Pause';
-        }
-      });
-      
-      document.getElementById("submit-test").addEventListener("click", function () {
-        const confirmSubmit = confirm("Are you sure you want to submit the test?");
-        if (confirmSubmit) {
-          submitTest();
-        }
+      showCustomCursor();
+      window.addEventListener("resize", function () {
+        if (window.innerWidth < 1024) hideCustomCursor();
+        else showCustomCursor();
       });
 
-      document.getElementById("back-to-tests").addEventListener("click", function () {
-        const confirmLeave = confirm("Leave the test? Your progress will be saved.");
-        if (confirmLeave) {
-          saveTestProgress();
-          
-          if (timerInterval) clearInterval(timerInterval);
-          
-          document.getElementById('test-interface-page').classList.add('hidden');
-          document.getElementById('test-selection-page').classList.remove('hidden');
-          document.getElementById('main-header').classList.add('hidden');
-          document.getElementById('question-navigation').classList.add('hidden');
+      document.getElementById("footerYear").textContent = new Date().getFullYear();
+    })();
+  </script>
 
-          loadTestsFromStorage();
-          displayTestCards();
-        }
-      });
+  <!--
+    TELEGRAM BRON (~30 soniya)
 
-      // ==================== AUTO REFRESH ====================
-      // Check for new tests every 3 seconds
-      setInterval(() => {
-        loadTestsFromStorage();
-        if (
-          document
-            .getElementById("test-selection-page")
-            .classList.contains("hidden") === false
-        ) {
-          displayTestCards();
-        }
-      }, 3000);
+    1) @BotFather → /newbot → TOKEN ni nusxalang.
+    2) CHAT_ID: @userinfobot da o‘z ID ingizni oling (raqam qatorida).
+    3) Script boshidagi FAQAT SHU IKKI SATRNI O‘ZGARTIRING: BOT_TOKEN va CHAT_ID
+       ni placeholder emas, haqiqiy qiymatga almashtiring. Botda «Start» bosing.
+    4) Sahifani yangilab, formani sinang.
 
-      // ==================== PAGE UNLOAD HANDLER ====================
-      window.addEventListener('beforeunload', function (e) {
-        if (currentTest) {
-          saveTestProgress();
-          // Show confirmation dialog
-          e.preventDefault();
-          e.returnValue = 'Your test progress will be saved. Are you sure you want to leave?';
-        }
-      });
-    </script>
-  </body>
+    Tokenni ochiq Git ga qo‘ymang. Xavfsizroq: window.__ZIYOFAT_TELEGRAM__
+    alohida (git ga kirmagan) faylda. Guruh uchun: botni guruhga qo‘shing,
+    getUpdates dan chat id ni oling (-100...).
+
+    Muammo: Internet / Start / tokenni tekshiring.
+  -->
+</body>
 </html>
